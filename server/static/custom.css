@@ -1,0 +1,13 @@
+.navbar ul {
+    list-style: none;
+    margin-bottom: 0;
+}
+
+.navbar li {
+    float: left;
+    margin: 0 1em 1em 0;
+}
+
+table {
+    table-layout: fixed;
+}
