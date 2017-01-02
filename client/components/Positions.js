@@ -22,9 +22,14 @@ class Positions extends Component {
             <tr key={i}>
               <td>{position.diff}</td>
               <td>{size}</td>
-              <td>{position.ask}<br/>{price(ask.sizes, ask.prices).toPrecision(6)}</td>
-              <td>{position.bid}<br/>
-              {price(bid.sizes, bid.prices).toPrecision(6)}</td>
+              <td>
+                {position.ask}<br />
+                {price(ask.sizes, ask.prices).toPrecision(6)}
+              </td>
+              <td>
+                {position.bid}<br/>
+                {price(bid.sizes, bid.prices).toPrecision(6)}
+              </td>
               <td>{position.slip.toFixed(1)}</td>
             </tr>
         )
