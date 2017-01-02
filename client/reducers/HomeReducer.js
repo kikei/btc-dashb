@@ -1,5 +1,6 @@
 export class homeConstants {
   static CHANGE_FLAG = 'CHANGE_FLAG'
+  static REQUEST_CHANGE_FLAG = 'HOME_REQUEST_CHANGE_FLAG'
   static FETCH_ASSETS = 'HOME_FETCH_ASSETS'
 }
 

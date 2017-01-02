@@ -85,6 +85,27 @@ const fetchTicks = dispatch => {
     })
 }
 
+const postChangeFlag = ({ key, value}) => dispatch => {
+  const body = {
+    value: value
+  }
+  fetch('/api/flags/' + key, {
+    method: 'POST',
+    body: JSON.stringify(body)
+  })
+    .then(response => response.json())
+    .then(json => {
+      console.log('flags posted', json)
+      dispatch({
+        type: homeConstants.CHANGE_FLAG,
+        payload: { key: key, value: json[key] }
+      })
+    })
+    .catch(error => {
+      console.error('error in posting flag', error)
+    })
+}
+
 const postCondition = condition => dispatch => {
   const body = {
     diff: condition.diff,
@@ -153,6 +174,8 @@ const serverApiMiddleware = store => next => {
       default:
         console.info('unknown pathname:', action.payload.pathname)
       }
+    } else if (action.type == homeConstants.REQUEST_CHANGE_FLAG) {
+      store.dispatch(postChangeFlag(action.payload))
     } else if (action.type == conditionsConstants.REQUEST_ADD_CONDITION) {
       store.dispatch(postCondition(action.payload))
     } else if (action.type == conditionsConstants.REQUEST_DELETE_CONDITION) {

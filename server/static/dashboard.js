@@ -158,6 +158,30 @@
 	  });
 	};
 	
+	var postChangeFlag = function postChangeFlag(_ref) {
+	  var key = _ref.key,
+	      value = _ref.value;
+	  return function (dispatch) {
+	    var body = {
+	      value: value
+	    };
+	    fetch('/api/flags/' + key, {
+	      method: 'POST',
+	      body: JSON.stringify(body)
+	    }).then(function (response) {
+	      return response.json();
+	    }).then(function (json) {
+	      console.log('flags posted', json);
+	      dispatch({
+	        type: _HomeReducer.homeConstants.CHANGE_FLAG,
+	        payload: { key: key, value: json[key] }
+	      });
+	    })['catch'](function (error) {
+	      console.error('error in posting flag', error);
+	    });
+	  };
+	};
+	
 	var postCondition = function postCondition(condition) {
 	  return function (dispatch) {
 	    var body = {
@@ -232,6 +256,8 @@
 	          default:
 	            console.info('unknown pathname:', action.payload.pathname);
 	        }
+	      } else if (action.type == _HomeReducer.homeConstants.REQUEST_CHANGE_FLAG) {
+	        store.dispatch(postChangeFlag(action.payload));
 	      } else if (action.type == _ConditionsReducer.conditionsConstants.REQUEST_ADD_CONDITION) {
 	        store.dispatch(postCondition(action.payload));
 	      } else if (action.type == _ConditionsReducer.conditionsConstants.REQUEST_DELETE_CONDITION) {
@@ -27725,7 +27751,7 @@
 	    value: function onOffClick(e) {
 	      e.preventDefault();
 	      var onoff = this.props.state.flags.onoff;
-	      this.props.changeFlag('onoff', !onoff);
+	      this.props.requestChangeFlag('onoff', !onoff);
 	    }
 	  }, {
 	    key: 'render',
@@ -27887,7 +27913,13 @@
 	}
 	
 	exports['default'] = (0, _reactRedux.connect)(mapStateToProps, {
-	  changeFlag: changeFlag
+	  changeFlag: changeFlag,
+	  requestChangeFlag: function requestChangeFlag(key, value) {
+	    return {
+	      type: _HomeReducer.homeConstants.REQUEST_CHANGE_FLAG,
+	      payload: { key: key, value: value }
+	    };
+	  }
 	})(Home);
 
 /***/ },
@@ -27908,6 +27940,7 @@
 	};
 	
 	homeConstants.CHANGE_FLAG = 'CHANGE_FLAG';
+	homeConstants.REQUEST_CHANGE_FLAG = 'HOME_REQUEST_CHANGE_FLAG';
 	homeConstants.FETCH_ASSETS = 'HOME_FETCH_ASSETS';
 	
 	

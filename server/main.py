@@ -31,6 +31,16 @@ def get_on():
     onoff = models.Flags.get_is_on()
     return flask.jsonify({'onoff': onoff})
 
+@app.route('/api/flags/<string:key>', methods=['POST'])
+def post_flag(key):
+    inputed = json.loads(flask.request.data.decode())
+    value = inputed['value']
+    if key == 'onoff' and isinstance(value, bool):
+        result = models.Flags.set_is_on(value)
+        return flask.jsonify({key: value})
+    else:
+        flask.abort(404)
+
 @app.route('/api/assets', methods=['GET'])
 def get_assets():
     bf = BitFlyer(tick_db)

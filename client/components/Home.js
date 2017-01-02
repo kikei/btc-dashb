@@ -7,7 +7,7 @@ class Home extends Component {
   onOffClick(e) {
     e.preventDefault()
     const onoff = this.props.state.flags.onoff
-    this.props.changeFlag('onoff', !onoff)
+    this.props.requestChangeFlag('onoff', !onoff)
   }
 
   render() {
@@ -87,5 +87,9 @@ function changeFlag(key, value) {
 }
 
 export default connect(mapStateToProps, {
-  changeFlag
+  changeFlag: changeFlag,
+  requestChangeFlag: (key, value) => ({
+    type: homeConstants.REQUEST_CHANGE_FLAG,
+    payload: { key: key, value: value }
+  })
 })(Home)
