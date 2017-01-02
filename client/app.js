@@ -21,6 +21,10 @@ import { conditionsReducer, conditionsConstants } from './reducers/ConditionsRed
 import Ticks from './components/Ticks'
 import { ticksReducer, ticksConstants } from './reducers/TicksReducer'
 
+/* Positions */
+import Positions from './components/Positions'
+import { positionsReducer, positionsConstants } from './reducers/PositionsReducer'
+
 const fetchFlags = dispatch => {
   fetch('/api/flags')
     .then(response => response.json())
@@ -82,6 +86,21 @@ const fetchTicks = dispatch => {
     })
     .catch(error => {
       console.log('error in fetching ticks', error)
+    })
+}
+
+const fetchPositions = dispatch => {
+  fetch('/api/positions')
+    .then(response => response.json())
+    .then(json => {
+      console.log('positions fetched', json)
+      dispatch({
+        type: positionsConstants.SET_POSITIONS,
+        payload: json
+      })
+    })
+    .catch(error => {
+      console.error('error in fetching positions', error)
     })
 }
 
@@ -164,6 +183,10 @@ const serverApiMiddleware = store => next => {
         store.dispatch(fetchTicks)
         break
       }
+      case '/positions': {
+        store.dispatch(fetchPositions)
+        break
+      }
       /*
       case '/404': {
         console.log('go to /yes')
@@ -198,6 +221,7 @@ const reducers = combineReducers({
   flags: homeReducer,
   conditions: conditionsReducer,
   ticks: ticksReducer,
+  positions: positionsReducer,
   routing: routerReducer
 })
 
@@ -224,6 +248,7 @@ ReactDOM.render(
         <IndexRoute component={Home}/>
         <Route path="/conditions" component={Conditions} />
         <Route path="/ticks" component={Ticks} />
+        <Route path="/positions" component={Positions} />
         <Route path="*" component={NotFound} />
       </Route>
     </Router>

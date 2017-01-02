@@ -102,6 +102,11 @@ def delete_condition(diff):
 def get_ticks():
     ticks = models.Ticks.one()
     return flask.jsonify({ 'exchangers': ticks })
+
+@app.route('/api/positions', methods=['GET'])
+def get_positions():
+    positions = models.Positions.all()
+    return flask.jsonify({ 'positions': positions })
     
 @app.route('/')
 def index():

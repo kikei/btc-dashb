@@ -19,6 +19,9 @@ export const MainApp = React.createClass({
                   <li>
                     <Link to="/ticks" className="button">Ticks</Link>
                   </li>
+                  <li>
+                    <Link to="/positions" className="button">Positions</Link>
+                  </li>
                 </ul>
               </div>
               <div className="container">
@@ -34,6 +37,9 @@ export const MainApp = React.createClass({
                   </li>
                   <li>
                     <a href="/api/ticks">/api/ticks</a>
+                  </li>
+                  <li>
+                    <a href="/api/positions">/api/positions</a>
                   </li>
                 </ul>
               </div>

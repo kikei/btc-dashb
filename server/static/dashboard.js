@@ -86,7 +86,16 @@
 	
 	var _TicksReducer = __webpack_require__(269);
 	
+	var _Positions = __webpack_require__(270);
+	
+	var _Positions2 = _interopRequireDefault(_Positions);
+	
+	var _PositionsReducer = __webpack_require__(271);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+	
+	/* Positions */
+	
 	
 	/* Ticks */
 	
@@ -155,6 +164,20 @@
 	    });
 	  })['catch'](function (error) {
 	    console.log('error in fetching ticks', error);
+	  });
+	};
+	
+	var fetchPositions = function fetchPositions(dispatch) {
+	  fetch('/api/positions').then(function (response) {
+	    return response.json();
+	  }).then(function (json) {
+	    console.log('positions fetched', json);
+	    dispatch({
+	      type: _PositionsReducer.positionsConstants.SET_POSITIONS,
+	      payload: json
+	    });
+	  })['catch'](function (error) {
+	    console.error('error in fetching positions', error);
 	  });
 	};
 	
@@ -246,6 +269,11 @@
 	              store.dispatch(fetchTicks);
 	              break;
 	            }
+	          case '/positions':
+	            {
+	              store.dispatch(fetchPositions);
+	              break;
+	            }
 	          /*
 	          case '/404': {
 	            console.log('go to /yes')
@@ -284,6 +312,7 @@
 	  flags: _HomeReducer.homeReducer,
 	  conditions: _ConditionsReducer.conditionsReducer,
 	  ticks: _TicksReducer.ticksReducer,
+	  positions: _PositionsReducer.positionsReducer,
 	  routing: _reactRouterRedux.routerReducer
 	});
 	
@@ -318,6 +347,7 @@
 	      _react2['default'].createElement(_reactRouter.IndexRoute, { component: _Home2['default'] }),
 	      _react2['default'].createElement(_reactRouter.Route, { path: '/conditions', component: _Conditions2['default'] }),
 	      _react2['default'].createElement(_reactRouter.Route, { path: '/ticks', component: _Ticks2['default'] }),
+	      _react2['default'].createElement(_reactRouter.Route, { path: '/positions', component: _Positions2['default'] }),
 	      _react2['default'].createElement(_reactRouter.Route, { path: '*', component: NotFound })
 	    )
 	  )
@@ -27633,6 +27663,15 @@
 	                  { to: '/ticks', className: 'button' },
 	                  'Ticks'
 	                )
+	              ),
+	              _react2['default'].createElement(
+	                'li',
+	                null,
+	                _react2['default'].createElement(
+	                  _reactRouter.Link,
+	                  { to: '/positions', className: 'button' },
+	                  'Positions'
+	                )
 	              )
 	            )
 	          ),
@@ -27676,6 +27715,15 @@
 	                  'a',
 	                  { href: '/api/ticks' },
 	                  '/api/ticks'
+	                )
+	              ),
+	              _react2['default'].createElement(
+	                'li',
+	                null,
+	                _react2['default'].createElement(
+	                  'a',
+	                  { href: '/api/positions' },
+	                  '/api/positions'
 	                )
 	              )
 	            )
@@ -28539,6 +28587,209 @@
 	    });
 	  }
 	  return Object.assign({}, state);
+	}
+
+/***/ },
+/* 270 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(1);
+	
+	var _reactRedux = __webpack_require__(180);
+	
+	var _PositionsReducer = __webpack_require__(271);
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	function sum(x) {
+	  return x.reduce(function (a, b) {
+	    return a + b;
+	  }, 0);
+	}
+	
+	var Positions = function (_Component) {
+	  _inherits(Positions, _Component);
+	
+	  function Positions() {
+	    _classCallCheck(this, Positions);
+	
+	    return _possibleConstructorReturn(this, (Positions.__proto__ || Object.getPrototypeOf(Positions)).apply(this, arguments));
+	  }
+	
+	  _createClass(Positions, [{
+	    key: 'render',
+	    value: function render() {
+	      var state = this.props.state;
+	
+	      console.log('this', this);
+	      var listPositions = state.positions.map(function (position, i) {
+	        var price = function price(sizes, prices) {
+	          return sum(sizes.map(function (e, i) {
+	            return e * prices[i];
+	          }));
+	        };
+	        var ask = position.exchangers[position.ask];
+	        var bid = position.exchangers[position.bid];
+	        var size = sum(ask.sizes);
+	        return React.createElement(
+	          'tr',
+	          { key: i },
+	          React.createElement(
+	            'td',
+	            null,
+	            position.diff
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            size
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            position.ask,
+	            React.createElement('br', null),
+	            price(ask.sizes, ask.prices).toPrecision(6)
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            position.bid,
+	            React.createElement('br', null),
+	            price(bid.sizes, bid.prices).toPrecision(6)
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            position.slip.toFixed(1)
+	          )
+	        );
+	      });
+	      var Viewer = React.createElement(
+	        'div',
+	        null,
+	        React.createElement(
+	          'h2',
+	          null,
+	          'Positions'
+	        ),
+	        React.createElement(
+	          'div',
+	          null,
+	          React.createElement(
+	            'table',
+	            { className: 'u-full-width' },
+	            React.createElement(
+	              'thead',
+	              null,
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'th',
+	                  { className: 'two' },
+	                  'diff'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  { className: 'two' },
+	                  'size'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  { className: 'three' },
+	                  'ask'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  { className: 'three' },
+	                  'bid'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  { className: 'two' },
+	                  'slip'
+	                )
+	              )
+	            ),
+	            React.createElement(
+	              'tbody',
+	              null,
+	              listPositions
+	            )
+	          )
+	        )
+	      );
+	      return React.createElement(
+	        'div',
+	        null,
+	        Viewer
+	      );
+	    }
+	  }]);
+	
+	  return Positions;
+	}(_react.Component);
+	
+	function mapStateToProps(state) {
+	  return {
+	    state: state.positions
+	  };
+	}
+	
+	exports['default'] = (0, _reactRedux.connect)(mapStateToProps, {})(Positions);
+
+/***/ },
+/* 271 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.positionsReducer = positionsReducer;
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var positionsConstants = exports.positionsConstants = function positionsConstants() {
+	  _classCallCheck(this, positionsConstants);
+	};
+	
+	positionsConstants.SET_POSITIONS = 'POSITIONS_SET_POSITIONS';
+	
+	
+	var initialState = {
+	  positions: []
+	};
+	
+	function positionsReducer() {
+	  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+	  var action = arguments[1];
+	
+	  console.log('positionsReducer', state, action);
+	  var type = action.type,
+	      payload = action.payload;
+	
+	  if (type == positionsConstants.SET_POSITIONS) {
+	    var positions = payload.positions.concat();
+	    return Object.assign({}, state, {
+	      positions: positions
+	    });
+	  }
+	  return state;
 	}
 
 /***/ }
