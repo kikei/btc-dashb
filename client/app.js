@@ -25,6 +25,10 @@ import { ticksReducer, ticksConstants } from './reducers/TicksReducer'
 import Positions from './components/Positions'
 import { positionsReducer, positionsConstants } from './reducers/PositionsReducer'
 
+/* Exchagers */
+import Quoine from './components/Quoine'
+import { quoineReducer, quoineConstants } from './reducers/QuoineReducer'
+
 const fetchFlags = dispatch => {
   fetch('/api/flags')
     .then(response => response.json())
@@ -101,6 +105,21 @@ const fetchPositions = dispatch => {
     })
     .catch(error => {
       console.error('error in fetching positions', error)
+    })
+}
+
+const fetchQuoine = dispatch => {
+  fetch('/api/exchangers/quoine')
+    .then(response => response.json())
+    .then(json => {
+      console.log('quoine fetched', json)
+      dispatch({
+        type: quoineConstants.SET_EXCHANGER,
+        payload: json
+      })
+    })
+    .catch(error => {
+      console.error('error in fetching quoine', error)
     })
 }
 
@@ -187,6 +206,10 @@ const serverApiMiddleware = store => next => {
         store.dispatch(fetchPositions)
         break
       }
+      case '/exchangers/quoine': {
+        store.dispatch(fetchQuoine)
+        break
+      }
       /*
       case '/404': {
         console.log('go to /yes')
@@ -222,6 +245,7 @@ const reducers = combineReducers({
   conditions: conditionsReducer,
   ticks: ticksReducer,
   positions: positionsReducer,
+  quoine: quoineReducer,
   routing: routerReducer
 })
 
@@ -249,6 +273,7 @@ ReactDOM.render(
         <Route path="/conditions" component={Conditions} />
         <Route path="/ticks" component={Ticks} />
         <Route path="/positions" component={Positions} />
+        <Route path="/exchangers/quoine" component={Quoine} />
         <Route path="*" component={NotFound} />
       </Route>
     </Router>

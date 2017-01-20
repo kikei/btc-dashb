@@ -92,7 +92,16 @@
 	
 	var _PositionsReducer = __webpack_require__(271);
 	
+	var _Quoine = __webpack_require__(272);
+	
+	var _Quoine2 = _interopRequireDefault(_Quoine);
+	
+	var _QuoineReducer = __webpack_require__(273);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+	
+	/* Exchagers */
+	
 	
 	/* Positions */
 	
@@ -178,6 +187,20 @@
 	    });
 	  })['catch'](function (error) {
 	    console.error('error in fetching positions', error);
+	  });
+	};
+	
+	var fetchQuoine = function fetchQuoine(dispatch) {
+	  fetch('/api/exchangers/quoine').then(function (response) {
+	    return response.json();
+	  }).then(function (json) {
+	    console.log('quoine fetched', json);
+	    dispatch({
+	      type: _QuoineReducer.quoineConstants.SET_EXCHANGER,
+	      payload: json
+	    });
+	  })['catch'](function (error) {
+	    console.error('error in fetching quoine', error);
 	  });
 	};
 	
@@ -274,6 +297,11 @@
 	              store.dispatch(fetchPositions);
 	              break;
 	            }
+	          case '/exchangers/quoine':
+	            {
+	              store.dispatch(fetchQuoine);
+	              break;
+	            }
 	          /*
 	          case '/404': {
 	            console.log('go to /yes')
@@ -313,6 +341,7 @@
 	  conditions: _ConditionsReducer.conditionsReducer,
 	  ticks: _TicksReducer.ticksReducer,
 	  positions: _PositionsReducer.positionsReducer,
+	  quoine: _QuoineReducer.quoineReducer,
 	  routing: _reactRouterRedux.routerReducer
 	});
 	
@@ -348,6 +377,7 @@
 	      _react2['default'].createElement(_reactRouter.Route, { path: '/conditions', component: _Conditions2['default'] }),
 	      _react2['default'].createElement(_reactRouter.Route, { path: '/ticks', component: _Ticks2['default'] }),
 	      _react2['default'].createElement(_reactRouter.Route, { path: '/positions', component: _Positions2['default'] }),
+	      _react2['default'].createElement(_reactRouter.Route, { path: '/exchangers/quoine', component: _Quoine2['default'] }),
 	      _react2['default'].createElement(_reactRouter.Route, { path: '*', component: NotFound })
 	    )
 	  )
@@ -27672,6 +27702,15 @@
 	                  { to: '/positions', className: 'button' },
 	                  'Positions'
 	                )
+	              ),
+	              _react2['default'].createElement(
+	                'li',
+	                null,
+	                _react2['default'].createElement(
+	                  _reactRouter.Link,
+	                  { to: '/exchangers/quoine', className: 'button' },
+	                  'Quoine'
+	                )
 	              )
 	            )
 	          ),
@@ -28787,6 +28826,269 @@
 	    var positions = payload.positions.concat();
 	    return Object.assign({}, state, {
 	      positions: positions
+	    });
+	  }
+	  return state;
+	}
+
+/***/ },
+/* 272 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(1);
+	
+	var _reactRedux = __webpack_require__(180);
+	
+	var _QuoineReducer = __webpack_require__(273);
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	function sum(x) {
+	  return x.reduce(function (a, b) {
+	    return a + b;
+	  }, 0);
+	}
+	
+	var Quoine = function (_Component) {
+	  _inherits(Quoine, _Component);
+	
+	  function Quoine() {
+	    _classCallCheck(this, Quoine);
+	
+	    return _possibleConstructorReturn(this, (Quoine.__proto__ || Object.getPrototypeOf(Quoine)).apply(this, arguments));
+	  }
+	
+	  _createClass(Quoine, [{
+	    key: 'render',
+	    value: function render() {
+	      var state = this.props.state;
+	
+	      console.log('this', this);
+	      var showPosition = function showPosition(position, i) {
+	        var price = function price(p) {
+	          return parseFloat(p);
+	        };
+	        var date = new Date(position.created_at * 1000).toLocaleString();
+	        return React.createElement(
+	          'tr',
+	          { key: i },
+	          React.createElement(
+	            'td',
+	            null,
+	            date
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            position.side
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            price(position.open_price).toFixed(1)
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            position.quantity
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            position.id
+	          )
+	        );
+	      };
+	      var listPositions = state.positions.filter(function (position, i) {
+	        return position.managed;
+	      }).map(showPosition);
+	      var listUnmanaged = state.positions.filter(function (position, i) {
+	        return !position.managed;
+	      }).map(showPosition);
+	      var Viewer = React.createElement(
+	        'div',
+	        null,
+	        React.createElement(
+	          'h2',
+	          null,
+	          'Quoine Positions'
+	        ),
+	        React.createElement(
+	          'div',
+	          null,
+	          React.createElement(
+	            'table',
+	            { className: 'u-full-width' },
+	            React.createElement(
+	              'thead',
+	              null,
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'th',
+	                  { className: 'two' },
+	                  'date'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  { className: 'two' },
+	                  'side'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  { className: 'three' },
+	                  'price'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  { className: 'three' },
+	                  'size'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  { className: 'two' },
+	                  'id'
+	                )
+	              )
+	            ),
+	            React.createElement(
+	              'tbody',
+	              null,
+	              listPositions
+	            )
+	          )
+	        ),
+	        React.createElement(
+	          'h2',
+	          null,
+	          'Quoine Positions (unmanaged)'
+	        ),
+	        React.createElement(
+	          'div',
+	          null,
+	          React.createElement(
+	            'table',
+	            { className: 'u-full-width' },
+	            React.createElement(
+	              'thead',
+	              null,
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'th',
+	                  { className: 'two' },
+	                  'date'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  { className: 'two' },
+	                  'side'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  { className: 'three' },
+	                  'price'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  { className: 'three' },
+	                  'size'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  { className: 'two' },
+	                  'id'
+	                )
+	              )
+	            ),
+	            React.createElement(
+	              'tbody',
+	              null,
+	              listUnmanaged
+	            )
+	          )
+	        )
+	      );
+	      return React.createElement(
+	        'div',
+	        null,
+	        Viewer
+	      );
+	    }
+	  }]);
+	
+	  return Quoine;
+	}(_react.Component);
+	
+	function mapStateToProps(state) {
+	  return {
+	    state: state.quoine
+	  };
+	}
+	
+	exports['default'] = (0, _reactRedux.connect)(mapStateToProps, {})(Quoine);
+
+/***/ },
+/* 273 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.quoineReducer = quoineReducer;
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var quoineConstants = exports.quoineConstants = function quoineConstants() {
+	  _classCallCheck(this, quoineConstants);
+	};
+	
+	quoineConstants.SET_EXCHANGER = 'QUOINE_SET_EXCHANGER';
+	
+	
+	var initialState = {
+	  net_asset: 0,
+	  tick: {
+	    ask: 0,
+	    bid: 0,
+	    datetime: ''
+	  },
+	  positions: []
+	};
+	
+	function quoineReducer() {
+	  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+	  var action = arguments[1];
+	
+	  console.log('quoineReducer', state, action);
+	  var type = action.type,
+	      payload = action.payload;
+	
+	  if (type == quoineConstants.SET_EXCHANGER) {
+	    return Object.assign({}, state, {
+	      net_asset: payload.net_asset,
+	      tick: {
+	        ask: payload.tick.ask,
+	        bid: payload.tick.bid,
+	        tick: payload.tick.datetime
+	      },
+	      positions: payload.positions.concat()
 	    });
 	  }
 	  return state;

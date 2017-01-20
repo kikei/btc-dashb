@@ -107,6 +107,35 @@ def get_ticks():
 def get_positions():
     positions = models.Positions.all()
     return flask.jsonify({ 'positions': positions })
+
+@app.route('/api/exchangers/quoine', methods=['GET'])
+def get_quoine():
+    positions = models.Positions.all()
+    ticks = models.Ticks.one()
+    
+    qn = Quoine(tick_db)
+    net_asset = qn.get_net_asset()
+    trades = qn.get_trades(limit=1000, status='open')
+    trades = trades['models']
+
+    # trade id list
+    managed_positions = set()
+
+    # build managed_positions
+    for position in positions:
+        quoine = position['exchangers']['quoine']
+        managed_positions |= set(quoine['ids'])
+    
+    # True managed means the trade is under management of applications.
+    # Trades with False managed need to be closed manually.
+    for trade in trades:
+        trade['managed'] = trade['id'] in managed_positions
+
+    return flask.jsonify({
+        'net_asset': net_asset,
+        'tick': ticks['quoine'],
+        'positions': trades
+    })
     
 @app.route('/')
 def index():
@@ -115,7 +144,7 @@ def index():
     return flask.render_template('index.html',
                                  title=title)
 
-@app.route('/<path>')
+@app.route('/<path:path>')
 def fallback(path):
     return index()
 

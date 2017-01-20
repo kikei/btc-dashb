@@ -22,6 +22,9 @@ export const MainApp = React.createClass({
                   <li>
                     <Link to="/positions" className="button">Positions</Link>
                   </li>
+                  <li>
+                    <Link to="/exchangers/quoine" className="button">Quoine</Link>
+                  </li>
                 </ul>
               </div>
               <div className="container">
