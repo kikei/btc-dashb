@@ -28712,7 +28712,7 @@
 	          React.createElement(
 	            'td',
 	            null,
-	            position.slip.toFixed(1)
+	            position.pnl.toFixed(1)
 	          )
 	        );
 	      });
@@ -28759,7 +28759,7 @@
 	                React.createElement(
 	                  'th',
 	                  { className: 'two' },
-	                  'slip'
+	                  'pnl'
 	                )
 	              )
 	            ),

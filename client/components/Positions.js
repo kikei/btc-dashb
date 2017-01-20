@@ -30,7 +30,7 @@ class Positions extends Component {
                 {position.bid}<br/>
                 {price(bid.sizes, bid.prices).toPrecision(6)}
               </td>
-              <td>{position.slip.toFixed(1)}</td>
+              <td>{position.pnl.toFixed(1)}</td>
             </tr>
         )
       }
@@ -46,7 +46,7 @@ class Positions extends Component {
                 <th className="two">size</th>
                 <th className="three">ask</th>
                 <th className="three">bid</th>
-                <th className="two">slip</th>
+                <th className="two">pnl</th>
               </tr>
             </thead>
             <tbody>

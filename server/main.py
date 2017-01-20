@@ -26,6 +26,20 @@ models = models(tick_db)
 
 app = flask.Flask(__name__)
 
+def inner_product(A, B):
+    return sum(a * b for (a, b) in zip(A, B))
+
+def calc_profit(ask, bid, exchangers, ticks):
+    ex_ask = exchangers[ask]
+    ex_bid = exchangers[bid]
+    size_ask = sum(ex_ask['sizes'])
+    size_bid = sum(ex_bid['sizes'])
+    ammount_ask = inner_product(ex_ask['sizes'], ex_ask['prices'])
+    ammount_bid = inner_product(ex_bid['sizes'], ex_bid['prices'])
+    profit_ask = size_ask * ticks[ask]['bid'] - ammount_ask
+    profit_bid = ammount_bid - size_bid * ticks[bid]['ask']
+    return profit_ask + profit_bid
+
 @app.route('/api/flags', methods=['GET'])
 def get_on():
     onoff = models.Flags.get_is_on()
@@ -106,6 +120,11 @@ def get_ticks():
 @app.route('/api/positions', methods=['GET'])
 def get_positions():
     positions = models.Positions.all()
+    ticks = models.Ticks.one()
+    for position in positions:
+        pnl = calc_profit(position['ask'], position['bid'],
+                          position['exchangers'], ticks)
+        position['pnl'] = pnl
     return flask.jsonify({ 'positions': positions })
 
 @app.route('/api/exchangers/quoine', methods=['GET'])
