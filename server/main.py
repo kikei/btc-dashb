@@ -114,7 +114,8 @@ def get_quoine():
     ticks = models.Ticks.one()
     
     qn = Quoine(tick_db)
-    net_asset = qn.get_net_asset()
+    account = qn.get_account()
+    
     trades = qn.get_trades(limit=1000, status='open')
     trades = trades['models']
 
@@ -132,7 +133,10 @@ def get_quoine():
         trade['managed'] = trade['id'] in managed_positions
 
     return flask.jsonify({
-        'net_asset': net_asset,
+        'net_asset': account['equity'],
+        'free_margin': account['free_margin'],
+        'required_margin': account['margin'],
+        'keep_rate': account['keep_rate'],
         'tick': ticks['quoine'],
         'positions': trades
     })

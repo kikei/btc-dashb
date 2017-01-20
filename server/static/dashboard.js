@@ -28876,11 +28876,121 @@
 	      var state = this.props.state;
 	
 	      console.log('this', this);
+	      var AccountView = React.createElement(
+	        'table',
+	        { className: 'u-full-width' },
+	        React.createElement(
+	          'thead',
+	          null,
+	          React.createElement(
+	            'tr',
+	            null,
+	            React.createElement(
+	              'th',
+	              null,
+	              'Name'
+	            ),
+	            React.createElement(
+	              'th',
+	              null,
+	              'Value'
+	            )
+	          )
+	        ),
+	        React.createElement(
+	          'tbody',
+	          null,
+	          React.createElement(
+	            'tr',
+	            null,
+	            React.createElement(
+	              'td',
+	              null,
+	              'Net Asset'
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              state.net_asset.toFixed(1),
+	              ' JPY'
+	            )
+	          ),
+	          React.createElement(
+	            'tr',
+	            null,
+	            React.createElement(
+	              'td',
+	              null,
+	              'Free Margin'
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              state.free_margin.toFixed(1),
+	              ' JPY'
+	            )
+	          ),
+	          React.createElement(
+	            'tr',
+	            null,
+	            React.createElement(
+	              'td',
+	              null,
+	              'Required Margin'
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              state.required_margin.toFixed(1),
+	              ' JPY'
+	            )
+	          ),
+	          React.createElement(
+	            'tr',
+	            null,
+	            React.createElement(
+	              'td',
+	              null,
+	              'Keep Rate'
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              state.keep_rate.toFixed(1),
+	              ' %'
+	            )
+	          ),
+	          React.createElement(
+	            'tr',
+	            null,
+	            React.createElement(
+	              'td',
+	              null,
+	              'Tick'
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              'ASK: ',
+	              state.tick.ask,
+	              React.createElement('br', null),
+	              'BID: ',
+	              state.tick.bid,
+	              React.createElement('br', null),
+	              '(',
+	              state.tick.datetime,
+	              ')'
+	            )
+	          )
+	        )
+	      );
+	
 	      var showPosition = function showPosition(position, i) {
 	        var price = function price(p) {
 	          return parseFloat(p);
 	        };
 	        var date = new Date(position.created_at * 1000).toLocaleString();
+	        var pnl = price(position.quantity) * (position.side == 'long' ? price(state.tick.bid) - price(position.open_price) : price(position.open_price) - price(state.tick.ask));
 	        return React.createElement(
 	          'tr',
 	          { key: i },
@@ -28907,6 +29017,11 @@
 	          React.createElement(
 	            'td',
 	            null,
+	            pnl.toFixed(1)
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
 	            position.id
 	          )
 	        );
@@ -28923,7 +29038,17 @@
 	        React.createElement(
 	          'h2',
 	          null,
-	          'Quoine Positions'
+	          'Quoine'
+	        ),
+	        React.createElement(
+	          'div',
+	          null,
+	          AccountView
+	        ),
+	        React.createElement(
+	          'h3',
+	          null,
+	          'Positions'
 	        ),
 	        React.createElement(
 	          'div',
@@ -28939,27 +29064,32 @@
 	                null,
 	                React.createElement(
 	                  'th',
-	                  { className: 'two' },
+	                  null,
 	                  'date'
 	                ),
 	                React.createElement(
 	                  'th',
-	                  { className: 'two' },
+	                  null,
 	                  'side'
 	                ),
 	                React.createElement(
 	                  'th',
-	                  { className: 'three' },
+	                  null,
 	                  'price'
 	                ),
 	                React.createElement(
 	                  'th',
-	                  { className: 'three' },
+	                  null,
 	                  'size'
 	                ),
 	                React.createElement(
 	                  'th',
-	                  { className: 'two' },
+	                  null,
+	                  'pnl'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
 	                  'id'
 	                )
 	              )
@@ -28972,9 +29102,9 @@
 	          )
 	        ),
 	        React.createElement(
-	          'h2',
+	          'h3',
 	          null,
-	          'Quoine Positions (unmanaged)'
+	          'Positions (unmanaged)'
 	        ),
 	        React.createElement(
 	          'div',
@@ -28990,27 +29120,32 @@
 	                null,
 	                React.createElement(
 	                  'th',
-	                  { className: 'two' },
+	                  null,
 	                  'date'
 	                ),
 	                React.createElement(
 	                  'th',
-	                  { className: 'two' },
+	                  null,
 	                  'side'
 	                ),
 	                React.createElement(
 	                  'th',
-	                  { className: 'three' },
+	                  null,
 	                  'price'
 	                ),
 	                React.createElement(
 	                  'th',
-	                  { className: 'three' },
+	                  null,
 	                  'size'
 	                ),
 	                React.createElement(
 	                  'th',
-	                  { className: 'two' },
+	                  null,
+	                  'pnl'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
 	                  'id'
 	                )
 	              )
@@ -29064,6 +29199,9 @@
 	
 	var initialState = {
 	  net_asset: 0,
+	  free_margin: 0,
+	  required_margin: 0,
+	  keep_rate: 0,
 	  tick: {
 	    ask: 0,
 	    bid: 0,
@@ -29083,10 +29221,13 @@
 	  if (type == quoineConstants.SET_EXCHANGER) {
 	    return Object.assign({}, state, {
 	      net_asset: payload.net_asset,
+	      free_margin: payload.free_margin,
+	      required_margin: payload.required_margin,
+	      keep_rate: payload.keep_rate,
 	      tick: {
 	        ask: payload.tick.ask,
 	        bid: payload.tick.bid,
-	        tick: payload.tick.datetime
+	        datetime: payload.tick.datetime
 	      },
 	      positions: payload.positions.concat()
 	    });
