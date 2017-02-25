@@ -28658,6 +28658,72 @@
 	  }, 0);
 	}
 	
+	function price(sizes, prices) {
+	  return sum(sizes.map(function (e, i) {
+	    return e * prices[i];
+	  }));
+	}
+	
+	function positions_to_totals(positions) {
+	  if (positions.length == 0) return null;
+	
+	  var total = {};
+	  var pnl = 0;
+	
+	  var _iteratorNormalCompletion = true;
+	  var _didIteratorError = false;
+	  var _iteratorError = undefined;
+	
+	  try {
+	    for (var _iterator = positions.length[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	      var position = _step.value;
+	
+	      var ask = position.exchangers[position.ask];
+	      var bid = position.exchangers[position.bid];
+	      if (!positions.ask in total) total[position.ask] = { size: 0, price: 0 };
+	      total[position.ask].size += sum(ask.sizes);
+	      total[position.ask].price += price(ask.sizes, ask.prices);
+	
+	      if (!position.bid in total) total[position.bid] = { size: 0, price: 0 };
+	      total[position.bid].size -= sum(bid.sizes);
+	      total[position.bid].price -= price(bid.sizes, bid.prices);
+	      pnl += position.pnl;
+	    }
+	  } catch (err) {
+	    _didIteratorError = true;
+	    _iteratorError = err;
+	  } finally {
+	    try {
+	      if (!_iteratorNormalCompletion && _iterator['return']) {
+	        _iterator['return']();
+	      }
+	    } finally {
+	      if (_didIteratorError) {
+	        throw _iteratorError;
+	      }
+	    }
+	  }
+	
+	  var totals = {
+	    'pnl': pnl
+	  };
+	  for (var exchanger in total) {
+	    if (total[exchanger].size > 0) {
+	      totals['size'] = total[exchanger].size;
+	      totals['ask'] = {
+	        exchanger: exchanger,
+	        price: total[exchanger].price
+	      };
+	    } else {
+	      totals['bid'] = {
+	        exchanger: exchanger,
+	        price: -total[exchanger].price
+	      };
+	    }
+	  }
+	  return totals;
+	}
+	
 	var Positions = function (_Component) {
 	  _inherits(Positions, _Component);
 	
@@ -28672,13 +28738,46 @@
 	    value: function render() {
 	      var state = this.props.state;
 	
-	      console.log('this', this);
+	
+	      var totalPosition = React.createElement('tr', null);
+	      if (state.positions.length > 0) {
+	        var total = positions_to_totals(state.positions);
+	        console.log(total);
+	        totalPosition = React.createElement(
+	          'tr',
+	          null,
+	          React.createElement(
+	            'th',
+	            null,
+	            'total'
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            total.size
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            total.ask.exchanger,
+	            React.createElement('br', null),
+	            total.ask.price.toPrecision(6)
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            total.bid.exchanger,
+	            React.createElement('br', null),
+	            total.bid.price.toPrecision(6)
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            total.pnl.toFixed(1)
+	          )
+	        );
+	      }
 	      var listPositions = state.positions.map(function (position, i) {
-	        var price = function price(sizes, prices) {
-	          return sum(sizes.map(function (e, i) {
-	            return e * prices[i];
-	          }));
-	        };
 	        var ask = position.exchangers[position.ask];
 	        var bid = position.exchangers[position.bid];
 	        var size = sum(ask.sizes);
@@ -28766,6 +28865,7 @@
 	            React.createElement(
 	              'tbody',
 	              null,
+	              totalPosition,
 	              listPositions
 	            )
 	          )
