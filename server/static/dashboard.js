@@ -28679,14 +28679,15 @@
 	      var position = _step.value;
 	
 	      var ask = position.exchangers[position.ask];
-	      var bid = position.exchangers[position.bid];
 	      if (!positions.ask in total) total[position.ask] = { size: 0, price: 0 };
 	      total[position.ask].size += sum(ask.sizes);
 	      total[position.ask].price += price(ask.sizes, ask.prices);
 	
+	      var bid = position.exchangers[position.bid];
 	      if (!position.bid in total) total[position.bid] = { size: 0, price: 0 };
 	      total[position.bid].size -= sum(bid.sizes);
 	      total[position.bid].price -= price(bid.sizes, bid.prices);
+	
 	      pnl += position.pnl;
 	    }
 	  } catch (err) {
@@ -28709,14 +28710,15 @@
 	  };
 	  for (var exchanger in total) {
 	    if (total[exchanger].size > 0) {
-	      totals['size'] = total[exchanger].size;
 	      totals['ask'] = {
+	        size: total[exchanger].size,
 	        exchanger: exchanger,
 	        price: total[exchanger].price
 	      };
 	    } else {
 	      totals['bid'] = {
 	        exchanger: exchanger,
+	        size: -total[exchanger].size,
 	        price: -total[exchanger].price
 	      };
 	    }
@@ -28961,6 +28963,69 @@
 	  }, 0);
 	}
 	
+	function toPrice(p) {
+	  return parseFloat(p);
+	}
+	
+	function calcPnl(position, tick) {
+	  return toPrice(position.quantity) * (position.side == 'long' ? toPrice(tick.bid) - toPrice(position.open_price) : toPrice(position.open_price) - toPrice(tick.ask));
+	}
+	
+	function positions_to_total(positions, tick) {
+	  if (positions.length == 0) return {
+	    side: '-',
+	    price: 0,
+	    size: 0,
+	    pnl: 0
+	  };
+	  var pnl = 0;
+	  var price = 0;
+	  var size = 0;
+	  var _iteratorNormalCompletion = true;
+	  var _didIteratorError = false;
+	  var _iteratorError = undefined;
+	
+	  try {
+	    for (var _iterator = positions[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	      var position = _step.value;
+	
+	      if (position.side == 'long') {
+	        price += toPrice(position.open_price);
+	        size += toPrice(position.quantity);
+	      } else {
+	        price -= toPrice(position.open_price);
+	        size -= toPrice(position.quantity);
+	      }
+	      pnl += calcPnl(position, tick);
+	    }
+	  } catch (err) {
+	    _didIteratorError = true;
+	    _iteratorError = err;
+	  } finally {
+	    try {
+	      if (!_iteratorNormalCompletion && _iterator['return']) {
+	        _iterator['return']();
+	      }
+	    } finally {
+	      if (_didIteratorError) {
+	        throw _iteratorError;
+	      }
+	    }
+	  }
+	
+	  return price > 0 ? {
+	    side: 'long',
+	    price: price,
+	    size: size,
+	    pnl: pnl
+	  } : {
+	    side: 'short',
+	    price: -price,
+	    size: -size,
+	    pnl: pnl
+	  };
+	}
+	
 	var Quoine = function (_Component) {
 	  _inherits(Quoine, _Component);
 	
@@ -29085,12 +29150,53 @@
 	        )
 	      );
 	
+	      var managedPositions = state.positions.filter(function (position, i) {
+	        return position.managed;
+	      });
+	      var unmanagedPositions = state.positions.filter(function (position, i) {
+	        return !position.managed;
+	      });
+	      var showTotal = function showTotal(positions) {
+	        var total = positions_to_total(positions, state.tick);
+	        console.log('total', total);
+	        return React.createElement(
+	          'tr',
+	          null,
+	          React.createElement(
+	            'th',
+	            null,
+	            'total'
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            total.side
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            total.price.toFixed(1)
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            total.size.toFixed(2)
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            total.pnl.toFixed(1)
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            '-'
+	          )
+	        );
+	      };
 	      var showPosition = function showPosition(position, i) {
-	        var price = function price(p) {
-	          return parseFloat(p);
-	        };
 	        var date = new Date(position.created_at * 1000).toLocaleString();
-	        var pnl = price(position.quantity) * (position.side == 'long' ? price(state.tick.bid) - price(position.open_price) : price(position.open_price) - price(state.tick.ask));
+	        var pnl = calcPnl(position, state.tick);
 	        return React.createElement(
 	          'tr',
 	          { key: i },
@@ -29107,7 +29213,7 @@
 	          React.createElement(
 	            'td',
 	            null,
-	            price(position.open_price).toFixed(1)
+	            toPrice(position.open_price).toFixed(1)
 	          ),
 	          React.createElement(
 	            'td',
@@ -29126,12 +29232,10 @@
 	          )
 	        );
 	      };
-	      var listPositions = state.positions.filter(function (position, i) {
-	        return position.managed;
-	      }).map(showPosition);
-	      var listUnmanaged = state.positions.filter(function (position, i) {
-	        return !position.managed;
-	      }).map(showPosition);
+	      var totalManaged = showTotal(managedPositions);
+	      var totalUnmanaged = showTotal(unmanagedPositions);
+	      var listPositions = managedPositions.map(showPosition);
+	      var listUnmanaged = unmanagedPositions.map(showPosition);
 	      var Viewer = React.createElement(
 	        'div',
 	        null,
@@ -29197,6 +29301,7 @@
 	            React.createElement(
 	              'tbody',
 	              null,
+	              totalManaged,
 	              listPositions
 	            )
 	          )
@@ -29253,6 +29358,7 @@
 	            React.createElement(
 	              'tbody',
 	              null,
+	              totalUnmanaged,
 	              listUnmanaged
 	            )
 	          )

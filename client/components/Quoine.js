@@ -7,6 +7,51 @@ function sum(x) {
   return x.reduce((a, b) => a + b, 0)
 }
 
+function toPrice(p) {
+  return parseFloat(p)
+}
+
+function calcPnl(position, tick) {
+  return toPrice(position.quantity) *
+    (position.side == 'long' ? 
+     toPrice(tick.bid) - toPrice(position.open_price) :
+     toPrice(position.open_price) - toPrice(tick.ask))
+}
+
+function positions_to_total(positions, tick) {
+  if (positions.length == 0)
+    return {
+      side: '-',
+      price: 0,
+      size: 0,
+      pnl: 0
+    }
+  var pnl = 0
+  var price = 0
+  var size = 0
+  for (let position of positions) {
+    if (position.side == 'long') {
+      price += toPrice(position.open_price)
+      size += toPrice(position.quantity)
+    } else {
+      price -= toPrice(position.open_price)
+      size -= toPrice(position.quantity)
+    }
+    pnl += calcPnl(position, tick)
+  }
+  return price > 0 ? {
+    side: 'long',
+    price: price,
+    size: size,
+    pnl: pnl
+  } : {
+    side: 'short',
+    price: -price,
+    size: -size,
+    pnl: pnl
+  }
+}
+
 class Quoine extends Component {
   render() {
     const { state } = this.props
@@ -47,31 +92,44 @@ class Quoine extends Component {
             </tbody>
           </table>
 
+    const managedPositions = state.positions.filter(
+      (position, i) => position.managed
+    )
+    const unmanagedPositions = state.positions.filter(
+      (position, i) => !position.managed
+    )
+    let showTotal = (positions) => {
+      const total = positions_to_total(positions, state.tick)
+      console.log('total', total)
+      return (
+          <tr>
+            <th>total</th>
+            <td>{total.side}</td>
+            <td>{total.price.toFixed(1)}</td>
+            <td>{total.size.toFixed(2)}</td>
+            <td>{total.pnl.toFixed(1)}</td>
+            <td>-</td>
+          </tr>
+      )
+    }
     let showPosition = (position, i) => {
-      let price = (p) => parseFloat(p)
       const date = new Date(position.created_at * 1000).toLocaleString()
-      const pnl =
-            price(position.quantity) *
-            (position.side == 'long' ? 
-             price(state.tick.bid) - price(position.open_price) :
-             price(position.open_price) - price(state.tick.ask))
+      const pnl = calcPnl(position, state.tick)
       return (
           <tr key={i}>
             <td>{date}</td>
             <td>{position.side}</td>
-            <td>{price(position.open_price).toFixed(1)}</td>
+            <td>{toPrice(position.open_price).toFixed(1)}</td>
             <td>{position.quantity}</td>
             <td>{pnl.toFixed(1)}</td>
             <td>{position.id}</td>
           </tr>
       )
     }
-    const listPositions = state.positions.filter(
-      (position, i) => position.managed
-    ).map(showPosition)
-    const listUnmanaged = state.positions.filter(
-      (position, i) => !position.managed
-    ).map(showPosition)
+    const totalManaged = showTotal(managedPositions)
+    const totalUnmanaged = showTotal(unmanagedPositions)
+    const listPositions = managedPositions.map(showPosition)
+    const listUnmanaged = unmanagedPositions.map(showPosition)
     const Viewer = (
       <div>
         <h2>Quoine</h2>
@@ -90,6 +148,7 @@ class Quoine extends Component {
               </tr>
             </thead>
             <tbody>
+              {totalManaged}
               {listPositions}
             </tbody>
           </table>
@@ -108,6 +167,7 @@ class Quoine extends Component {
               </tr>
             </thead>
             <tbody>
+              {totalUnmanaged}
               {listUnmanaged}
             </tbody>
           </table>
