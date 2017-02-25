@@ -28665,7 +28665,18 @@
 	}
 	
 	function positions_to_totals(positions) {
-	  if (positions.length == 0) return null;
+	  if (positions.length == 0) return {
+	    size: 0,
+	    pnl: 0,
+	    ask: {
+	      exchanger: '-',
+	      price: 0
+	    },
+	    bid: {
+	      exchanger: '-',
+	      price: 0
+	    }
+	  };
 	
 	  var total = {};
 	  var pnl = 0;
@@ -28675,16 +28686,16 @@
 	  var _iteratorError = undefined;
 	
 	  try {
-	    for (var _iterator = positions.length[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	    for (var _iterator = positions[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 	      var position = _step.value;
 	
 	      var ask = position.exchangers[position.ask];
-	      if (!positions.ask in total) total[position.ask] = { size: 0, price: 0 };
+	      if (!(positions.ask in total)) total[position.ask] = { size: 0, price: 0 };
 	      total[position.ask].size += sum(ask.sizes);
 	      total[position.ask].price += price(ask.sizes, ask.prices);
 	
 	      var bid = position.exchangers[position.bid];
-	      if (!position.bid in total) total[position.bid] = { size: 0, price: 0 };
+	      if (!(position.bid in total)) total[position.bid] = { size: 0, price: 0 };
 	      total[position.bid].size -= sum(bid.sizes);
 	      total[position.bid].price -= price(bid.sizes, bid.prices);
 	
@@ -28705,13 +28716,11 @@
 	    }
 	  }
 	
-	  var totals = {
-	    'pnl': pnl
-	  };
+	  var totals = {};
 	  for (var exchanger in total) {
 	    if (total[exchanger].size > 0) {
+	      totals['size'] = total[exchanger].size;
 	      totals['ask'] = {
-	        size: total[exchanger].size,
 	        exchanger: exchanger,
 	        price: total[exchanger].price
 	      };
@@ -28723,6 +28732,7 @@
 	      };
 	    }
 	  }
+	  totals['pnl'] = pnl;
 	  return totals;
 	}
 	
@@ -28741,11 +28751,9 @@
 	      var state = this.props.state;
 	
 	
-	      var totalPosition = React.createElement('tr', null);
-	      if (state.positions.length > 0) {
-	        var total = positions_to_totals(state.positions);
-	        console.log(total);
-	        totalPosition = React.createElement(
+	      var showTotal = function showTotal(positions) {
+	        var total = positions_to_totals(positions);
+	        return React.createElement(
 	          'tr',
 	          null,
 	          React.createElement(
@@ -28778,7 +28786,9 @@
 	            total.pnl.toFixed(1)
 	          )
 	        );
-	      }
+	      };
+	
+	      var totalPosition = showTotal(state.positions);
 	      var listPositions = state.positions.map(function (position, i) {
 	        var ask = position.exchangers[position.ask];
 	        var bid = position.exchangers[position.bid];

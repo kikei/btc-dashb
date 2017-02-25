@@ -12,20 +12,32 @@ function price(sizes, prices) {
 }
 
 function positions_to_totals(positions) {
-  if (positions.length == 0) return null
+  if (positions.length == 0)
+    return {
+      size: 0,
+      pnl: 0,
+      ask: {
+        exchanger: '-',
+        price: 0,
+      },
+      bid: {
+        exchanger: '-',
+        price: 0,
+      }
+    }
   
   const total = {}
   var pnl = 0
   
-  for (let position of positions.length) {
+  for (let position of positions) {
     const ask = position.exchangers[position.ask]
-    if (!positions.ask in total)
+    if (!(positions.ask in total))
       total[position.ask] = { size: 0, price: 0 }
     total[position.ask].size += sum(ask.sizes)
     total[position.ask].price += price(ask.sizes, ask.prices)
     
     const bid = position.exchangers[position.bid]
-    if (!position.bid in total)
+    if (!(position.bid in total))
       total[position.bid] = { size: 0, price: 0 }
     total[position.bid].size -= sum(bid.sizes)
     total[position.bid].price -= price(bid.sizes, bid.prices)
@@ -33,13 +45,11 @@ function positions_to_totals(positions) {
     pnl += position.pnl
   }
 
-  var totals = {
-    'pnl': pnl
-  }
+  var totals = { }
   for (var exchanger in total) {
     if (total[exchanger].size > 0) {
+      totals['size'] = total[exchanger].size
       totals['ask'] = {
-        size: total[exchanger].size,
         exchanger: exchanger,
         price: total[exchanger].price
       }
@@ -51,18 +61,17 @@ function positions_to_totals(positions) {
       }
     }
   }
+  totals['pnl'] = pnl
   return totals
 }
 
 class Positions extends Component {
   render() {
     const { state } = this.props
-    
-    var totalPosition = (<tr></tr>)
-    if (state.positions.length > 0) {
-      const total = positions_to_totals(state.positions)
-      console.log(total)
-      totalPosition = (
+
+    let showTotal = (positions) => {
+      const total = positions_to_totals(positions)
+      return (
           <tr>
             <th>total</th>
             <td>{total.size}</td>
@@ -78,6 +87,8 @@ class Positions extends Component {
           </tr>
       )
     }
+    
+    const totalPosition = showTotal(state.positions)
     const listPositions = state.positions.map(
       (position, i) => {
         const ask = position.exchangers[position.ask]
