@@ -28690,12 +28690,12 @@
 	      var position = _step.value;
 	
 	      var ask = position.exchangers[position.ask];
-	      if (!(positions.ask in total)) total[position.ask] = { size: 0, price: 0 };
+	      if (!total[position.ask]) total[position.ask] = { size: 0, price: 0 };
 	      total[position.ask].size += sum(ask.sizes);
 	      total[position.ask].price += price(ask.sizes, ask.prices);
 	
 	      var bid = position.exchangers[position.bid];
-	      if (!(position.bid in total)) total[position.bid] = { size: 0, price: 0 };
+	      if (!total[position.bid]) total[position.bid] = { size: 0, price: 0 };
 	      total[position.bid].size -= sum(bid.sizes);
 	      total[position.bid].price -= price(bid.sizes, bid.prices);
 	
@@ -28727,7 +28727,6 @@
 	    } else {
 	      totals['bid'] = {
 	        exchanger: exchanger,
-	        size: -total[exchanger].size,
 	        price: -total[exchanger].price
 	      };
 	    }
@@ -28764,21 +28763,21 @@
 	          React.createElement(
 	            'td',
 	            null,
-	            total.size
+	            total.size.toFixed(1)
 	          ),
 	          React.createElement(
 	            'td',
 	            null,
 	            total.ask.exchanger,
 	            React.createElement('br', null),
-	            total.ask.price.toPrecision(6)
+	            total.ask.price.toFixed(1)
 	          ),
 	          React.createElement(
 	            'td',
 	            null,
 	            total.bid.exchanger,
 	            React.createElement('br', null),
-	            total.bid.price.toPrecision(6)
+	            total.bid.price.toFixed(1)
 	          ),
 	          React.createElement(
 	            'td',
@@ -29000,10 +28999,10 @@
 	      var position = _step.value;
 	
 	      if (position.side == 'long') {
-	        price += toPrice(position.open_price);
+	        price += toPrice(position.open_price) * toPrice(position.quantity);
 	        size += toPrice(position.quantity);
 	      } else {
-	        price -= toPrice(position.open_price);
+	        price -= toPrice(position.open_price) * toPrice(position.quantity);
 	        size -= toPrice(position.quantity);
 	      }
 	      pnl += calcPnl(position, tick);

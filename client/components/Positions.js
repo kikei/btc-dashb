@@ -31,13 +31,13 @@ function positions_to_totals(positions) {
   
   for (let position of positions) {
     const ask = position.exchangers[position.ask]
-    if (!(positions.ask in total))
+    if (!total[position.ask])
       total[position.ask] = { size: 0, price: 0 }
     total[position.ask].size += sum(ask.sizes)
     total[position.ask].price += price(ask.sizes, ask.prices)
     
     const bid = position.exchangers[position.bid]
-    if (!(position.bid in total))
+    if (!total[position.bid])
       total[position.bid] = { size: 0, price: 0 }
     total[position.bid].size -= sum(bid.sizes)
     total[position.bid].price -= price(bid.sizes, bid.prices)
@@ -56,7 +56,6 @@ function positions_to_totals(positions) {
     } else {
       totals['bid'] = {
         exchanger: exchanger,
-        size: -total[exchanger].size,
         price: -total[exchanger].price
       }
     }
@@ -74,14 +73,14 @@ class Positions extends Component {
       return (
           <tr>
             <th>total</th>
-            <td>{total.size}</td>
+            <td>{total.size.toFixed(1)}</td>
             <td>
               {total.ask.exchanger}<br />
-              {total.ask.price.toPrecision(6)}
+              {total.ask.price.toFixed(1)}
             </td>
             <td>
               {total.bid.exchanger}<br />
-              {total.bid.price.toPrecision(6)}
+              {total.bid.price.toFixed(1)}
             </td>
             <td>{total.pnl.toFixed(1)}</td>
           </tr>

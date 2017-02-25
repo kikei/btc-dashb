@@ -31,10 +31,10 @@ function positions_to_total(positions, tick) {
   var size = 0
   for (let position of positions) {
     if (position.side == 'long') {
-      price += toPrice(position.open_price)
+      price += toPrice(position.open_price) * toPrice(position.quantity)
       size += toPrice(position.quantity)
     } else {
-      price -= toPrice(position.open_price)
+      price -= toPrice(position.open_price) * toPrice(position.quantity)
       size -= toPrice(position.quantity)
     }
     pnl += calcPnl(position, tick)
