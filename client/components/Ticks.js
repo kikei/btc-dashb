@@ -3,6 +3,8 @@ import { connect } from 'react-redux'
 
 import { ticksConstants } from '../reducers/TicksReducer'
 
+import Loadable from './Loadable'
+
 class Ticks extends Component {
   render() {
     const { state } = this.props
@@ -20,8 +22,8 @@ class Ticks extends Component {
     return (
         <div>
           <h2>Ticks</h2>
-          <div>
-            <table>
+          <Loadable loading={state.ticksLoading}>
+            <table className="u-full-width">
               <thead>
                 <tr>
                   <td>exchanger</td>
@@ -34,7 +36,7 @@ class Ticks extends Component {
                 {listExchangers}
               </tbody>
             </table>
-          </div>
+          </Loadable>
         </div>
     )
   }

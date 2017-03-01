@@ -66,147 +66,238 @@
 	
 	var _reactRouterRedux = __webpack_require__(258);
 	
-	var _MainApp = __webpack_require__(263);
+	var _GuestApp = __webpack_require__(263);
 	
-	var _Home = __webpack_require__(264);
+	var _LoggedInApp = __webpack_require__(264);
+	
+	var _LoggedInApp2 = _interopRequireDefault(_LoggedInApp);
+	
+	var _Login = __webpack_require__(265);
+	
+	var _Login2 = _interopRequireDefault(_Login);
+	
+	var _LoginReducer = __webpack_require__(266);
+	
+	var _Home = __webpack_require__(267);
 	
 	var _Home2 = _interopRequireDefault(_Home);
 	
-	var _HomeReducer = __webpack_require__(265);
+	var _HomeReducer = __webpack_require__(268);
 	
-	var _Conditions = __webpack_require__(266);
+	var _Conditions = __webpack_require__(270);
 	
 	var _Conditions2 = _interopRequireDefault(_Conditions);
 	
-	var _ConditionsReducer = __webpack_require__(267);
+	var _ConditionsReducer = __webpack_require__(271);
 	
-	var _Ticks = __webpack_require__(268);
+	var _Ticks = __webpack_require__(272);
 	
 	var _Ticks2 = _interopRequireDefault(_Ticks);
 	
-	var _TicksReducer = __webpack_require__(269);
+	var _TicksReducer = __webpack_require__(273);
 	
-	var _Positions = __webpack_require__(270);
+	var _Positions = __webpack_require__(274);
 	
 	var _Positions2 = _interopRequireDefault(_Positions);
 	
-	var _PositionsReducer = __webpack_require__(271);
+	var _PositionsReducer = __webpack_require__(275);
 	
-	var _Quoine = __webpack_require__(272);
+	var _Quoine = __webpack_require__(276);
 	
 	var _Quoine2 = _interopRequireDefault(_Quoine);
 	
-	var _QuoineReducer = __webpack_require__(273);
+	var _QuoineReducer = __webpack_require__(277);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	/* Exchagers */
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	/* Authentication */
 	
 	
-	/* Positions */
+	/* Login */
 	
 	
-	/* Ticks */
+	/* Home */
 	
 	
 	/* Conditions */
 	
 	
-	/* Home */
-	var fetchFlags = function fetchFlags(dispatch) {
-	  fetch('/api/flags').then(function (response) {
-	    return response.json();
-	  }).then(function (json) {
-	    console.log('flags fetched', json);
-	    Object.keys(json).forEach(function (key) {
-	      dispatch({
-	        type: _HomeReducer.homeConstants.CHANGE_FLAG,
-	        payload: { key: key, value: json[key] }
-	      });
-	    });
-	  })['catch'](function (error) {
-	    console.log('error in fetching flags', error);
+	/* Ticks */
+	
+	
+	/* Positions */
+	
+	
+	/* Exchagers */
+	
+	
+	var fetchProtected = function fetchProtected(url, token) {
+	  return fetch(url, {
+	    headers: {
+	      'Authorization': 'JWT ' + token
+	    }
 	  });
 	};
 	
-	/* MainApp */
-	
-	
-	var fetchAssets = function fetchAssets(dispatch) {
-	  fetch('/api/assets').then(function (response) {
-	    return response.json();
-	  }).then(function (json) {
-	    console.log('assets fetched', json);
-	    Object.keys(json).forEach(function (key) {
+	var fetchAccount = function fetchAccount(token) {
+	  return function (dispatch) {
+	    fetchProtected('/auth/account', token).then(function (response) {
+	      return response.json();
+	    }).then(function (json) {
+	      console.log('account', json);
 	      dispatch({
-	        type: _HomeReducer.homeConstants.FETCH_ASSETS,
+	        type: mainConstants.SET_ACCOUNT,
 	        payload: json
 	      });
+	    })['catch'](function (error) {
+	      console.error('error in authentication', error);
 	    });
-	  })['catch'](function (error) {
-	    console.log('error in fetching assets', error);
-	  });
+	  };
 	};
 	
-	var fetchConditions = function fetchConditions(dispatch) {
-	  fetch('/api/conditions').then(function (response) {
-	    return response.json();
-	  }).then(function (json) {
-	    console.log('conditions fetched', json);
-	    dispatch({
-	      type: _ConditionsReducer.conditionsConstants.SET_CONDITIONS,
-	      payload: json.conditions
+	var fetchFlags = function fetchFlags(token) {
+	  return function (dispatch) {
+	    fetchProtected('/api/flags', token).then(function (response) {
+	      return response.json();
+	    }).then(function (json) {
+	      console.log('flags fetched', json);
+	      Object.keys(json).forEach(function (key) {
+	        dispatch({
+	          type: _HomeReducer.homeConstants.CHANGE_FLAG,
+	          payload: { key: key, value: json[key] }
+	        });
+	      });
+	    })['catch'](function (error) {
+	      console.log('error in fetching flags', error);
 	    });
-	  })['catch'](function (error) {
-	    console.log('error in fetching conditions', error);
-	  });
+	  };
 	};
 	
-	var fetchTicks = function fetchTicks(dispatch) {
-	  fetch('/api/ticks').then(function (response) {
-	    return response.json();
-	  }).then(function (json) {
-	    console.log('ticks fetched', json);
-	    dispatch({
-	      type: _TicksReducer.ticksConstants.SET_TICKS,
-	      payload: json
+	var fetchAssets = function fetchAssets(token) {
+	  return function (dispatch) {
+	    fetchProtected('/api/assets', token).then(function (response) {
+	      return response.json();
+	    }).then(function (json) {
+	      console.log('assets fetched', json);
+	      Object.keys(json).forEach(function (key) {
+	        dispatch({
+	          type: _HomeReducer.homeConstants.FETCH_ASSETS,
+	          payload: json
+	        });
+	      });
+	    })['catch'](function (error) {
+	      console.log('error in fetching assets', error);
 	    });
-	  })['catch'](function (error) {
-	    console.log('error in fetching ticks', error);
-	  });
+	  };
 	};
 	
-	var fetchPositions = function fetchPositions(dispatch) {
-	  fetch('/api/positions').then(function (response) {
-	    return response.json();
-	  }).then(function (json) {
-	    console.log('positions fetched', json);
-	    dispatch({
-	      type: _PositionsReducer.positionsConstants.SET_POSITIONS,
-	      payload: json
+	var fetchConditions = function fetchConditions(token) {
+	  return function (dispatch) {
+	    fetchProtected('/api/conditions', token).then(function (response) {
+	      return response.json();
+	    }).then(function (json) {
+	      console.log('conditions fetched', json);
+	      dispatch({
+	        type: _ConditionsReducer.conditionsConstants.SET_CONDITIONS,
+	        payload: json.conditions
+	      });
+	    })['catch'](function (error) {
+	      console.log('error in fetching conditions', error);
 	    });
-	  })['catch'](function (error) {
-	    console.error('error in fetching positions', error);
-	  });
+	  };
 	};
 	
-	var fetchQuoine = function fetchQuoine(dispatch) {
-	  fetch('/api/exchangers/quoine').then(function (response) {
-	    return response.json();
-	  }).then(function (json) {
-	    console.log('quoine fetched', json);
-	    dispatch({
-	      type: _QuoineReducer.quoineConstants.SET_EXCHANGER,
-	      payload: json
+	var fetchTicks = function fetchTicks(token) {
+	  return function (dispatch) {
+	    fetchProtected('/api/ticks', token).then(function (response) {
+	      return response.json();
+	    }).then(function (json) {
+	      console.log('ticks fetched', json);
+	      dispatch({
+	        type: _TicksReducer.ticksConstants.SET_TICKS,
+	        payload: json
+	      });
+	    })['catch'](function (error) {
+	      console.log('error in fetching ticks', error);
 	    });
-	  })['catch'](function (error) {
-	    console.error('error in fetching quoine', error);
-	  });
+	  };
 	};
 	
-	var postChangeFlag = function postChangeFlag(_ref) {
-	  var key = _ref.key,
-	      value = _ref.value;
+	var fetchPositions = function fetchPositions(token) {
+	  return function (dispatch) {
+	    fetchProtected('/api/positions', token).then(function (response) {
+	      return response.json();
+	    }).then(function (json) {
+	      console.log('positions fetched', json);
+	      dispatch({
+	        type: _PositionsReducer.positionsConstants.SET_POSITIONS,
+	        payload: json
+	      });
+	    })['catch'](function (error) {
+	      console.error('error in fetching positions', error);
+	    });
+	  };
+	};
+	
+	var fetchQuoine = function fetchQuoine(token) {
+	  return function (dispatch) {
+	    fetchProtected('/api/exchangers/quoine', token).then(function (response) {
+	      return response.json();
+	    }).then(function (json) {
+	      console.log('quoine fetched', json);
+	      dispatch({
+	        type: _QuoineReducer.quoineConstants.SET_EXCHANGER,
+	        payload: json
+	      });
+	    })['catch'](function (error) {
+	      console.error('error in fetching quoine', error);
+	    });
+	  };
+	};
+	
+	var postLogin = function postLogin(_ref) {
+	  var username = _ref.username,
+	      password = _ref.password;
+	  return function (dispatch) {
+	    var body = {
+	      username: username,
+	      password: password
+	    };
+	    fetch('/auth', {
+	      method: 'POST',
+	      body: JSON.stringify(body),
+	      headers: {
+	        'Content-Type': 'application/json'
+	      }
+	    }).then(function (response) {
+	      return response.json();
+	    }).then(function (json) {
+	      console.log('login posted', json);
+	      dispatch({
+	        type: mainConstants.SET_ACCESS_TOKEN,
+	        payload: json['access_token']
+	      });
+	      store.dispatch(_reactRouter.browserHistory.push('/'));
+	    })['catch'](function (error) {
+	      console.error('error in login', error);
+	    });
+	  };
+	};
+	
+	var doLogout = function doLogout() {
+	  return function (dispatch) {
+	    localStorage.setItem('access_token', null);
+	    setTimeout(function () {
+	      store.dispatch(_reactRouter.browserHistory.push('/login'));
+	    }, 1000);
+	  };
+	};
+	
+	var postChangeFlag = function postChangeFlag(_ref2) {
+	  var key = _ref2.key,
+	      value = _ref2.value;
 	  return function (dispatch) {
 	    var body = {
 	      value: value
@@ -270,36 +361,70 @@
 	  };
 	};
 	
+	var requireToken = function requireToken(store, dispatcher) {
+	  /*
+	  const token = store.getState().token
+	  */
+	  var token = localStorage.getItem('access_token');
+	  console.log('token', token);
+	  if (!token) {
+	    store.dispatch(_reactRouter.browserHistory.push('/login'));
+	  } else {
+	    dispatcher(token);
+	  }
+	};
+	
 	var serverApiMiddleware = function serverApiMiddleware(store) {
 	  return function (next) {
 	    return function (action) {
 	      if (!action) return;
 	      if (action.type == _reactRouterRedux.LOCATION_CHANGE) {
+	        console.log('state.getState()', store.getState());
+	        console.log('action', action);
 	        switch (action.payload.pathname) {
+	          case '/login':
+	            {
+	              break;
+	            }
+	          case '/logout':
+	            {
+	              store.dispatch(doLogout());
+	              break;
+	            }
 	          case '/':
 	            {
-	              store.dispatch(fetchFlags);
-	              store.dispatch(fetchAssets);
+	              requireToken(store, function (token) {
+	                store.dispatch(fetchFlags(token));
+	                store.dispatch(fetchAssets(token));
+	              });
 	              break;
 	            }
 	          case '/conditions':
 	            {
-	              store.dispatch(fetchConditions);
+	              requireToken(store, function (token) {
+	                store.dispatch(fetchConditions(token));
+	              });
 	              break;
 	            }
 	          case '/ticks':
 	            {
-	              store.dispatch(fetchTicks);
+	              requireToken(store, function (token) {
+	                store.dispatch(fetchTicks(token));
+	              });
 	              break;
 	            }
 	          case '/positions':
 	            {
-	              store.dispatch(fetchPositions);
+	              requireToken(store, function (token) {
+	                store.dispatch(fetchPositions(token));
+	              });
 	              break;
 	            }
 	          case '/exchangers/quoine':
 	            {
-	              store.dispatch(fetchQuoine);
+	              requireToken(store, function (token) {
+	                store.dispatch(fetchQuoine(token));
+	              });
 	              break;
 	            }
 	          /*
@@ -312,6 +437,8 @@
 	          default:
 	            console.info('unknown pathname:', action.payload.pathname);
 	        }
+	      } else if (action.type == _LoginReducer.loginConstants.REQUEST_LOGIN) {
+	        store.dispatch(postLogin(action.payload));
 	      } else if (action.type == _HomeReducer.homeConstants.REQUEST_CHANGE_FLAG) {
 	        store.dispatch(postChangeFlag(action.payload));
 	      } else if (action.type == _ConditionsReducer.conditionsConstants.REQUEST_ADD_CONDITION) {
@@ -324,19 +451,40 @@
 	  };
 	};
 	
-	var initialState = {
-	  number: 1
+	var mainConstants = function mainConstants() {
+	  _classCallCheck(this, mainConstants);
 	};
+	
+	mainConstants.SET_ACCESS_TOKEN = "MAIN_SET_ACCESS_TOKEN";
+	mainConstants.SET_ACCOUNT = 'MAIN_SET_ACCOUNT';
+	
+	
+	var initialState = {
+	  number: 1,
+	  token: localStorage.getItem('token')
+	};
+	
 	function mainReducer() {
 	  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
 	  var action = arguments[1];
 	
 	  console.log('mainReducer', state, action);
+	  var type = action.type,
+	      payload = action.payload;
+	
+	  if (type == mainConstants.SET_ACCESS_TOKEN) {
+	    localStorage.setItem('access_token', payload);
+	  } else if (type == mainConstants.SET_ACCOUNT) {
+	    return Object.assign({}, state, {
+	      accounts: payload
+	    });
+	  }
 	  return state;
 	}
 	
 	var reducers = (0, _redux.combineReducers)({
 	  main: mainReducer,
+	  login: _LoginReducer.loginReducer,
 	  flags: _HomeReducer.homeReducer,
 	  conditions: _ConditionsReducer.conditionsReducer,
 	  ticks: _TicksReducer.ticksReducer,
@@ -364,6 +512,33 @@
 	  }
 	});
 	
+	var Logout = _react2['default'].createClass({
+	  displayName: 'Logout',
+	
+	  render: function render() {
+	    return _react2['default'].createElement(
+	      'div',
+	      null,
+	      _react2['default'].createElement(
+	        'span',
+	        null,
+	        'Logging out...'
+	      )
+	    );
+	  }
+	});
+	
+	function requireLogin(state, transition) {
+	  console.log('requireLogin', state);
+	  var token = localStorage.getItem('access_token');
+	  if (!token) {
+	    transition({
+	      pathname: '/login',
+	      state: { nextPathname: state.location.pathname }
+	    });
+	  }
+	}
+	
 	_reactDom2['default'].render(_react2['default'].createElement(
 	  _reactRedux.Provider,
 	  { store: store },
@@ -372,14 +547,25 @@
 	    { history: history },
 	    _react2['default'].createElement(
 	      _reactRouter.Route,
-	      { path: '/', component: _MainApp.MainApp },
-	      _react2['default'].createElement(_reactRouter.IndexRoute, { component: _Home2['default'] }),
-	      _react2['default'].createElement(_reactRouter.Route, { path: '/conditions', component: _Conditions2['default'] }),
-	      _react2['default'].createElement(_reactRouter.Route, { path: '/ticks', component: _Ticks2['default'] }),
-	      _react2['default'].createElement(_reactRouter.Route, { path: '/positions', component: _Positions2['default'] }),
-	      _react2['default'].createElement(_reactRouter.Route, { path: '/exchangers/quoine', component: _Quoine2['default'] }),
-	      _react2['default'].createElement(_reactRouter.Route, { path: '*', component: NotFound })
-	    )
+	      { component: _GuestApp.GuestApp },
+	      _react2['default'].createElement(_reactRouter.Route, { path: 'login', component: _Login2['default'] }),
+	      _react2['default'].createElement(_reactRouter.Route, { path: 'logout', component: Logout })
+	    ),
+	    _react2['default'].createElement(
+	      _reactRouter.Route,
+	      { path: '/', component: _LoggedInApp2['default'] },
+	      _react2['default'].createElement(_reactRouter.IndexRoute, { onEnter: requireLogin,
+	        component: _Home2['default'] }),
+	      _react2['default'].createElement(_reactRouter.Route, { path: 'conditions', onEnter: requireLogin,
+	        component: _Conditions2['default'] }),
+	      _react2['default'].createElement(_reactRouter.Route, { path: 'ticks', onEnter: requireLogin,
+	        component: _Ticks2['default'] }),
+	      _react2['default'].createElement(_reactRouter.Route, { path: 'positions', onEnter: requireLogin,
+	        component: _Positions2['default'] }),
+	      _react2['default'].createElement(_reactRouter.Route, { path: 'exchangers/quoine', onEnter: requireLogin,
+	        component: _Quoine2['default'] })
+	    ),
+	    _react2['default'].createElement(_reactRouter.Route, { path: '*', component: NotFound })
 	  )
 	), document.getElementById('dashboard-app'));
 
@@ -27633,7 +27819,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.MainApp = undefined;
+	exports.GuestApp = undefined;
 	
 	var _react = __webpack_require__(1);
 	
@@ -27643,10 +27829,13 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var MainApp = exports.MainApp = _react2['default'].createClass({
-	  displayName: 'MainApp',
+	var GuestApp = exports.GuestApp = _react2['default'].createClass({
+	  displayName: 'GuestApp',
 	
 	  render: function render() {
+	    var state = this.props.state;
+	
+	    console.log('GuestApp', this);
 	    return _react2['default'].createElement(
 	      'div',
 	      { className: 'container' },
@@ -27657,116 +27846,6 @@
 	          'h1',
 	          null,
 	          'BitcoinArb Dashboard'
-	        ),
-	        _react2['default'].createElement(
-	          'nav',
-	          { className: 'navbar' },
-	          _react2['default'].createElement(
-	            'div',
-	            { className: 'container' },
-	            _react2['default'].createElement(
-	              'ul',
-	              null,
-	              _react2['default'].createElement(
-	                'li',
-	                null,
-	                _react2['default'].createElement(
-	                  _reactRouter.Link,
-	                  { to: '/', className: 'button' },
-	                  'Home'
-	                )
-	              ),
-	              _react2['default'].createElement(
-	                'li',
-	                null,
-	                _react2['default'].createElement(
-	                  _reactRouter.Link,
-	                  { to: '/conditions', className: 'button' },
-	                  'Conditions'
-	                )
-	              ),
-	              _react2['default'].createElement(
-	                'li',
-	                null,
-	                _react2['default'].createElement(
-	                  _reactRouter.Link,
-	                  { to: '/ticks', className: 'button' },
-	                  'Ticks'
-	                )
-	              ),
-	              _react2['default'].createElement(
-	                'li',
-	                null,
-	                _react2['default'].createElement(
-	                  _reactRouter.Link,
-	                  { to: '/positions', className: 'button' },
-	                  'Positions'
-	                )
-	              ),
-	              _react2['default'].createElement(
-	                'li',
-	                null,
-	                _react2['default'].createElement(
-	                  _reactRouter.Link,
-	                  { to: '/exchangers/quoine', className: 'button' },
-	                  'Quoine'
-	                )
-	              )
-	            )
-	          ),
-	          _react2['default'].createElement(
-	            'div',
-	            { className: 'container' },
-	            _react2['default'].createElement(
-	              'ul',
-	              null,
-	              _react2['default'].createElement(
-	                'li',
-	                null,
-	                _react2['default'].createElement(
-	                  'a',
-	                  { href: '/api/flags' },
-	                  '/api/flags'
-	                )
-	              ),
-	              _react2['default'].createElement(
-	                'li',
-	                null,
-	                _react2['default'].createElement(
-	                  'a',
-	                  { href: '/api/assets' },
-	                  '/api/assets'
-	                )
-	              ),
-	              _react2['default'].createElement(
-	                'li',
-	                null,
-	                _react2['default'].createElement(
-	                  'a',
-	                  { href: '/api/conditions' },
-	                  '/api/conditions'
-	                )
-	              ),
-	              _react2['default'].createElement(
-	                'li',
-	                null,
-	                _react2['default'].createElement(
-	                  'a',
-	                  { href: '/api/ticks' },
-	                  '/api/ticks'
-	                )
-	              ),
-	              _react2['default'].createElement(
-	                'li',
-	                null,
-	                _react2['default'].createElement(
-	                  'a',
-	                  { href: '/api/positions' },
-	                  '/api/positions'
-	                )
-	              )
-	            )
-	          )
 	        )
 	      ),
 	      _react2['default'].createElement(
@@ -27777,28 +27856,6 @@
 	    );
 	  }
 	});
-	
-	/*
-	export default function App({ children }) {
-	  return (
-	    <div>
-	      <header>
-	        Links:
-	        {' '}
-	        <Link to="/">Home</Link>
-	        {' '}
-	        <Link to="/foo">Foo</Link>
-	        {' '}
-	        <Link to="/bar">Bar</Link>
-	      </header>
-	      <div>
-	        <button onClick={() => browserHistory.push('/foo')}>Go to /foo</button>
-	      </div>
-	      <div style={{ marginTop: '1.5em' }}>{children}</div>
-	    </div>
-	  )
-	}
-	*/
 
 /***/ },
 /* 264 */
@@ -27814,9 +27871,388 @@
 	
 	var _react = __webpack_require__(1);
 	
+	var _reactRouter = __webpack_require__(200);
+	
 	var _reactRedux = __webpack_require__(180);
 	
-	var _HomeReducer = __webpack_require__(265);
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var LoggedInApp = function (_Component) {
+	  _inherits(LoggedInApp, _Component);
+	
+	  function LoggedInApp() {
+	    _classCallCheck(this, LoggedInApp);
+	
+	    return _possibleConstructorReturn(this, (LoggedInApp.__proto__ || Object.getPrototypeOf(LoggedInApp)).apply(this, arguments));
+	  }
+	
+	  _createClass(LoggedInApp, [{
+	    key: 'render',
+	    value: function render() {
+	      var state = this.props.state;
+	
+	      console.log('LoggedInApp', this);
+	      return React.createElement(
+	        'div',
+	        { className: 'container' },
+	        React.createElement(
+	          'div',
+	          { style: { position: "absolute", top: "0px",
+	              textAlign: "right" },
+	            className: 'u-full-width' },
+	          React.createElement(
+	            _reactRouter.Link,
+	            { to: '/logout' },
+	            'Logout'
+	          )
+	        ),
+	        React.createElement(
+	          'header',
+	          null,
+	          React.createElement(
+	            'h1',
+	            null,
+	            'BitcoinArb Dashboard'
+	          ),
+	          React.createElement(
+	            'nav',
+	            { className: 'navbar' },
+	            React.createElement(
+	              'div',
+	              { className: 'container' },
+	              React.createElement(
+	                'ul',
+	                null,
+	                React.createElement(
+	                  'li',
+	                  null,
+	                  React.createElement(
+	                    _reactRouter.Link,
+	                    { to: '/', className: 'button' },
+	                    'Home'
+	                  )
+	                ),
+	                React.createElement(
+	                  'li',
+	                  null,
+	                  React.createElement(
+	                    _reactRouter.Link,
+	                    { to: '/conditions', className: 'button' },
+	                    'Conditions'
+	                  )
+	                ),
+	                React.createElement(
+	                  'li',
+	                  null,
+	                  React.createElement(
+	                    _reactRouter.Link,
+	                    { to: '/ticks', className: 'button' },
+	                    'Ticks'
+	                  )
+	                ),
+	                React.createElement(
+	                  'li',
+	                  null,
+	                  React.createElement(
+	                    _reactRouter.Link,
+	                    { to: '/positions', className: 'button' },
+	                    'Positions'
+	                  )
+	                ),
+	                React.createElement(
+	                  'li',
+	                  null,
+	                  React.createElement(
+	                    _reactRouter.Link,
+	                    { to: '/exchangers/quoine', className: 'button' },
+	                    'Quoine'
+	                  )
+	                )
+	              )
+	            ),
+	            React.createElement(
+	              'div',
+	              { className: 'container' },
+	              React.createElement(
+	                'ul',
+	                null,
+	                React.createElement(
+	                  'li',
+	                  null,
+	                  React.createElement(
+	                    'a',
+	                    { href: '/api/flags' },
+	                    '/api/flags'
+	                  )
+	                ),
+	                React.createElement(
+	                  'li',
+	                  null,
+	                  React.createElement(
+	                    'a',
+	                    { href: '/api/assets' },
+	                    '/api/assets'
+	                  )
+	                ),
+	                React.createElement(
+	                  'li',
+	                  null,
+	                  React.createElement(
+	                    'a',
+	                    { href: '/api/conditions' },
+	                    '/api/conditions'
+	                  )
+	                ),
+	                React.createElement(
+	                  'li',
+	                  null,
+	                  React.createElement(
+	                    'a',
+	                    { href: '/api/ticks' },
+	                    '/api/ticks'
+	                  )
+	                ),
+	                React.createElement(
+	                  'li',
+	                  null,
+	                  React.createElement(
+	                    'a',
+	                    { href: '/api/positions' },
+	                    '/api/positions'
+	                  )
+	                )
+	              )
+	            )
+	          )
+	        ),
+	        React.createElement(
+	          'div',
+	          null,
+	          this.props.children
+	        )
+	      );
+	    }
+	  }]);
+	
+	  return LoggedInApp;
+	}(_react.Component);
+	
+	function mapStateToProps(state) {
+	  return state;
+	}
+	
+	exports['default'] = (0, _reactRedux.connect)(mapStateToProps, {})(LoggedInApp);
+
+/***/ },
+/* 265 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(1);
+	
+	var _reactRedux = __webpack_require__(180);
+	
+	var _LoginReducer = __webpack_require__(266);
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Login = function (_Component) {
+	  _inherits(Login, _Component);
+	
+	  function Login() {
+	    _classCallCheck(this, Login);
+	
+	    return _possibleConstructorReturn(this, (Login.__proto__ || Object.getPrototypeOf(Login)).apply(this, arguments));
+	  }
+	
+	  _createClass(Login, [{
+	    key: 'changeUsername',
+	    value: function changeUsername(e) {
+	      e.preventDefault();
+	      this.props.setUsername(e.target.value);
+	    }
+	  }, {
+	    key: 'changePassword',
+	    value: function changePassword(e) {
+	      e.preventDefault();
+	      this.props.setPassword(e.target.value);
+	    }
+	  }, {
+	    key: 'clickLogin',
+	    value: function clickLogin(e) {
+	      e.preventDefault();
+	      var _props$state = this.props.state,
+	          editUsername = _props$state.editUsername,
+	          editPassword = _props$state.editPassword;
+	
+	      this.props.requestLogin(editUsername, editPassword);
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      var state = this.props.state;
+	
+	      console.log('Login', state, this.props);
+	      return React.createElement(
+	        'div',
+	        { className: 'center-container' },
+	        React.createElement(
+	          'div',
+	          { className: 'center-box' },
+	          React.createElement(
+	            'div',
+	            null,
+	            React.createElement(
+	              'label',
+	              { htmlFor: 'input-username' },
+	              'Username:'
+	            ),
+	            React.createElement('input', { type: 'text', onChange: this.changeUsername.bind(this),
+	              value: state.editUsername,
+	              className: 'u-full-width' })
+	          ),
+	          React.createElement(
+	            'div',
+	            null,
+	            React.createElement(
+	              'label',
+	              { htmlFor: 'input-password' },
+	              'Password:'
+	            ),
+	            React.createElement('input', { type: 'password', onChange: this.changePassword.bind(this),
+	              value: state.editPassword,
+	              className: 'u-full-width' })
+	          ),
+	          React.createElement(
+	            'div',
+	            null,
+	            React.createElement(
+	              'button',
+	              { onClick: this.clickLogin.bind(this),
+	                className: 'button-primary u-full-width' },
+	              'Login'
+	            )
+	          )
+	        )
+	      );
+	    }
+	  }]);
+	
+	  return Login;
+	}(_react.Component);
+	
+	function mapStateToProps(state) {
+	  return {
+	    state: state.login
+	  };
+	}
+	
+	exports['default'] = (0, _reactRedux.connect)(mapStateToProps, {
+	  setUsername: function setUsername(username) {
+	    return {
+	      type: _LoginReducer.loginConstants.SET_USERNAME,
+	      payload: username
+	    };
+	  },
+	  setPassword: function setPassword(password) {
+	    return {
+	      type: _LoginReducer.loginConstants.SET_PASSWORD,
+	      payload: password
+	    };
+	  },
+	  requestLogin: function requestLogin(username, password) {
+	    return {
+	      type: _LoginReducer.loginConstants.REQUEST_LOGIN,
+	      payload: { username: username, password: password }
+	    };
+	  }
+	})(Login);
+
+/***/ },
+/* 266 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.loginReducer = loginReducer;
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var loginConstants = exports.loginConstants = function loginConstants() {
+	  _classCallCheck(this, loginConstants);
+	};
+	
+	loginConstants.SET_USERNAME = "LOGIN_CHANGE_USERNAME";
+	loginConstants.SET_PASSWORD = "LOGIN_CHANGE_PASSWORD";
+	loginConstants.REQUEST_LOGIN = "LOGIN_REQUEST_LOGIN";
+	
+	
+	var initialFlagsState = {
+	  editUsername: '',
+	  editPassword: ''
+	};
+	
+	function loginReducer() {
+	  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialFlagsState;
+	  var action = arguments[1];
+	
+	  console.log('loginReducer', state, action);
+	  var type = action.type,
+	      payload = action.payload;
+	
+	  if (type == loginConstants.SET_USERNAME) {
+	    return Object.assign({}, state, {
+	      editUsername: payload
+	    });
+	  } else if (type == loginConstants.SET_PASSWORD) {
+	    return Object.assign({}, state, {
+	      editPassword: payload
+	    });
+	  }
+	  return state;
+	}
+
+/***/ },
+/* 267 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(1);
+	
+	var _reactRedux = __webpack_require__(180);
+	
+	var _HomeReducer = __webpack_require__(268);
+	
+	var _Loadable = __webpack_require__(269);
+	
+	var _Loadable2 = _interopRequireDefault(_Loadable);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
@@ -27855,8 +28291,8 @@
 	          'Flags'
 	        ),
 	        React.createElement(
-	          'div',
-	          null,
+	          _Loadable2['default'],
+	          { loading: state.flagsLoading },
 	          React.createElement(
 	            'table',
 	            { className: 'u-full-width' },
@@ -27908,8 +28344,8 @@
 	          'Assets'
 	        ),
 	        React.createElement(
-	          'div',
-	          null,
+	          _Loadable2['default'],
+	          { loading: state.assetsLoading },
 	          React.createElement(
 	            'table',
 	            { className: 'u-full-width' },
@@ -28010,7 +28446,7 @@
 	})(Home);
 
 /***/ },
-/* 265 */
+/* 268 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -28047,7 +28483,9 @@
 	    total: {
 	      net_asset: 0
 	    }
-	  }
+	  },
+	  assetsLoading: true,
+	  flagsLoading: true
 	};
 	
 	function homeReducer() {
@@ -28065,19 +28503,21 @@
 	    var flags = {};
 	    flags[key] = value;
 	    return Object.assign({}, state, {
-	      flags: Object.assign({}, state.flags, flags)
+	      flags: Object.assign({}, state.flags, flags),
+	      flagsLoading: false
 	    });
 	  } else if (type == homeConstants.FETCH_ASSETS) {
 	    var assets = Object.assign({}, payload);
 	    return Object.assign({}, state, {
-	      assets: assets
+	      assets: assets,
+	      assetsLoading: false
 	    });
 	  }
 	  return state;
 	}
 
 /***/ },
-/* 266 */
+/* 269 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -28092,7 +28532,66 @@
 	
 	var _reactRedux = __webpack_require__(180);
 	
-	var _ConditionsReducer = __webpack_require__(267);
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Loadable = function (_Component) {
+	  _inherits(Loadable, _Component);
+	
+	  function Loadable() {
+	    _classCallCheck(this, Loadable);
+	
+	    return _possibleConstructorReturn(this, (Loadable.__proto__ || Object.getPrototypeOf(Loadable)).apply(this, arguments));
+	  }
+	
+	  _createClass(Loadable, [{
+	    key: 'render',
+	    value: function render() {
+	      return React.createElement(
+	        'div',
+	        { className: 'loadable' },
+	        React.createElement(
+	          'div',
+	          { className: 'loader',
+	            style: { display: this.props.loading ? 'block' : 'none' } },
+	          'Loading...'
+	        ),
+	        this.props.children
+	      );
+	    }
+	  }]);
+	
+	  return Loadable;
+	}(_react.Component);
+	
+	exports['default'] = Loadable;
+
+/***/ },
+/* 270 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(1);
+	
+	var _reactRedux = __webpack_require__(180);
+	
+	var _ConditionsReducer = __webpack_require__(271);
+	
+	var _Loadable = __webpack_require__(269);
+	
+	var _Loadable2 = _interopRequireDefault(_Loadable);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
@@ -28196,8 +28695,8 @@
 	          'Conditions'
 	        ),
 	        React.createElement(
-	          'div',
-	          null,
+	          _Loadable2['default'],
+	          { loading: state.conditionsLoading },
 	          React.createElement(
 	            'table',
 	            { className: 'u-full-width' },
@@ -28363,7 +28862,7 @@
 	})(Conditions);
 
 /***/ },
-/* 267 */
+/* 271 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -28396,7 +28895,8 @@
 	  conditions: [],
 	  editDiff: '',
 	  editLots: '',
-	  editProfit: ''
+	  editProfit: '',
+	  conditionsLoading: true
 	};
 	
 	function conditionsReducer() {
@@ -28410,7 +28910,8 @@
 	  if (type == conditionsConstants.SET_CONDITIONS) {
 	    var conditions = payload.concat();
 	    return Object.assign({}, state, {
-	      conditions: conditions
+	      conditions: conditions,
+	      conditionsLoading: false
 	    });
 	  } else if (type == conditionsConstants.SET_DIFF) {
 	    return Object.assign({}, state, {
@@ -28459,7 +28960,7 @@
 	}
 
 /***/ },
-/* 268 */
+/* 272 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -28474,7 +28975,13 @@
 	
 	var _reactRedux = __webpack_require__(180);
 	
-	var _TicksReducer = __webpack_require__(269);
+	var _TicksReducer = __webpack_require__(273);
+	
+	var _Loadable = __webpack_require__(269);
+	
+	var _Loadable2 = _interopRequireDefault(_Loadable);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
@@ -28532,11 +29039,11 @@
 	          'Ticks'
 	        ),
 	        React.createElement(
-	          'div',
-	          null,
+	          _Loadable2['default'],
+	          { loading: state.ticksLoading },
 	          React.createElement(
 	            'table',
-	            null,
+	            { className: 'u-full-width' },
 	            React.createElement(
 	              'thead',
 	              null,
@@ -28588,7 +29095,7 @@
 	exports['default'] = (0, _reactRedux.connect)(mapStateToProps, {})(Ticks);
 
 /***/ },
-/* 269 */
+/* 273 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -28608,7 +29115,8 @@
 	
 	
 	var initialState = {
-	  exchangers: {}
+	  exchangers: {},
+	  ticksLoading: true
 	};
 	
 	function ticksReducer() {
@@ -28622,14 +29130,15 @@
 	  if (type == ticksConstants.SET_TICKS) {
 	    var ticks = Object.assign({}, payload.exchangers);
 	    return Object.assign({}, state, {
-	      exchangers: ticks
+	      exchangers: ticks,
+	      ticksLoading: false
 	    });
 	  }
 	  return Object.assign({}, state);
 	}
 
 /***/ },
-/* 270 */
+/* 274 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -28644,7 +29153,13 @@
 	
 	var _reactRedux = __webpack_require__(180);
 	
-	var _PositionsReducer = __webpack_require__(271);
+	var _PositionsReducer = __webpack_require__(275);
+	
+	var _Loadable = __webpack_require__(269);
+	
+	var _Loadable2 = _interopRequireDefault(_Loadable);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
@@ -28835,8 +29350,8 @@
 	          'Positions'
 	        ),
 	        React.createElement(
-	          'div',
-	          null,
+	          _Loadable2['default'],
+	          { loading: state.positionsLoading },
 	          React.createElement(
 	            'table',
 	            { className: 'u-full-width' },
@@ -28902,7 +29417,7 @@
 	exports['default'] = (0, _reactRedux.connect)(mapStateToProps, {})(Positions);
 
 /***/ },
-/* 271 */
+/* 275 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -28922,7 +29437,8 @@
 	
 	
 	var initialState = {
-	  positions: []
+	  positions: [],
+	  positionsLoading: true
 	};
 	
 	function positionsReducer() {
@@ -28936,14 +29452,15 @@
 	  if (type == positionsConstants.SET_POSITIONS) {
 	    var positions = payload.positions.concat();
 	    return Object.assign({}, state, {
-	      positions: positions
+	      positions: positions,
+	      positionsLoading: false
 	    });
 	  }
 	  return state;
 	}
 
 /***/ },
-/* 272 */
+/* 276 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -28958,7 +29475,13 @@
 	
 	var _reactRedux = __webpack_require__(180);
 	
-	var _QuoineReducer = __webpack_require__(273);
+	var _QuoineReducer = __webpack_require__(277);
+	
+	var _Loadable = __webpack_require__(269);
+	
+	var _Loadable2 = _interopRequireDefault(_Loadable);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
@@ -29254,8 +29777,8 @@
 	          'Quoine'
 	        ),
 	        React.createElement(
-	          'div',
-	          null,
+	          _Loadable2['default'],
+	          { loading: state.accountLoading },
 	          AccountView
 	        ),
 	        React.createElement(
@@ -29264,8 +29787,8 @@
 	          'Positions'
 	        ),
 	        React.createElement(
-	          'div',
-	          null,
+	          _Loadable2['default'],
+	          { loading: state.positionsLoading },
 	          React.createElement(
 	            'table',
 	            { className: 'u-full-width' },
@@ -29321,8 +29844,8 @@
 	          'Positions (unmanaged)'
 	        ),
 	        React.createElement(
-	          'div',
-	          null,
+	          _Loadable2['default'],
+	          { loading: state.positionsLoading },
 	          React.createElement(
 	            'table',
 	            { className: 'u-full-width' },
@@ -29393,7 +29916,7 @@
 	exports['default'] = (0, _reactRedux.connect)(mapStateToProps, {})(Quoine);
 
 /***/ },
-/* 273 */
+/* 277 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -29422,7 +29945,9 @@
 	    bid: 0,
 	    datetime: ''
 	  },
-	  positions: []
+	  positions: [],
+	  accountLoading: true,
+	  positionsLoading: true
 	};
 	
 	function quoineReducer() {
@@ -29444,7 +29969,9 @@
 	        bid: payload.tick.bid,
 	        datetime: payload.tick.datetime
 	      },
-	      positions: payload.positions.concat()
+	      positions: payload.positions.concat(),
+	      accountLoading: false,
+	      positionsLoading: false
 	    });
 	  }
 	  return state;

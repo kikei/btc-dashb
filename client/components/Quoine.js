@@ -3,6 +3,8 @@ import { connect } from 'react-redux'
 
 import { quoineConstants } from '../reducers/QuoineReducer'
 
+import Loadable from './Loadable'
+
 function sum(x) {
   return x.reduce((a, b) => a + b, 0)
 }
@@ -133,9 +135,11 @@ class Quoine extends Component {
     const Viewer = (
       <div>
         <h2>Quoine</h2>
-        <div>{AccountView}</div>
+        <Loadable loading={state.accountLoading}>
+          {AccountView}
+        </Loadable>
         <h3>Positions</h3>
-        <div>
+        <Loadable loading={state.positionsLoading}>
           <table className="u-full-width">
             <thead>
               <tr>
@@ -152,9 +156,9 @@ class Quoine extends Component {
               {listPositions}
             </tbody>
           </table>
-        </div>
+        </Loadable>
         <h3>Positions (unmanaged)</h3>
-        <div>
+        <Loadable loading={state.positionsLoading}>
           <table className="u-full-width">
             <thead>
               <tr>
@@ -171,7 +175,7 @@ class Quoine extends Component {
               {listUnmanaged}
             </tbody>
           </table>
-        </div>
+        </Loadable>
       </div>
     )
     return (

@@ -20,7 +20,9 @@ const initialFlagsState = {
     total: {
       net_asset: 0
     }
-  }
+  },
+  assetsLoading: true,
+  flagsLoading: true
 }
 
 export function homeReducer(state=initialFlagsState, action) {
@@ -31,12 +33,14 @@ export function homeReducer(state=initialFlagsState, action) {
     const flags = {}
     flags[key] = value
     return Object.assign({}, state, {
-      flags: Object.assign({}, state.flags, flags)
+      flags: Object.assign({}, state.flags, flags),
+      flagsLoading: false
     })
   } else if (type == homeConstants.FETCH_ASSETS) {
     const assets = Object.assign({}, payload)
     return Object.assign({}, state, {
-      assets: assets
+      assets: assets,
+      assetsLoading: false
     })
   }
   return state

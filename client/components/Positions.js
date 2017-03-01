@@ -3,6 +3,8 @@ import { connect } from 'react-redux'
 
 import { positionsConstants } from '../reducers/PositionsReducer'
 
+import Loadable from './Loadable'
+
 function sum(x) {
   return x.reduce((a, b) => a + b, 0)
 }
@@ -113,7 +115,7 @@ class Positions extends Component {
     const Viewer = (
       <div>
         <h2>Positions</h2>
-        <div>
+        <Loadable loading={state.positionsLoading}>
           <table className="u-full-width">
             <thead>
               <tr>
@@ -129,7 +131,7 @@ class Positions extends Component {
               {listPositions}
             </tbody>
           </table>
-        </div>
+        </Loadable>
       </div>
     )
     return (

@@ -13,7 +13,8 @@ const initialState = {
   conditions: [],
   editDiff: '',
   editLots: '',
-  editProfit: ''
+  editProfit: '',
+  conditionsLoading: true
 }
 
 export function conditionsReducer(state=initialState, action) {
@@ -22,7 +23,8 @@ export function conditionsReducer(state=initialState, action) {
   if (type == conditionsConstants.SET_CONDITIONS) {
     const conditions = payload.concat()
     return Object.assign({}, state, {
-      conditions: conditions
+      conditions: conditions,
+      conditionsLoading: false
     })
   } else if (type == conditionsConstants.SET_DIFF) {
     return Object.assign({}, state, {

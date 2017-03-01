@@ -4,6 +4,7 @@ export class positionsConstants {
 
 const initialState = {
   positions: [],
+  positionsLoading: true
 }
 
 export function positionsReducer(state=initialState, action) {
@@ -12,7 +13,8 @@ export function positionsReducer(state=initialState, action) {
   if (type == positionsConstants.SET_POSITIONS) {
     const positions = payload.positions.concat()
     return Object.assign({}, state, {
-      positions: positions
+      positions: positions,
+      positionsLoading: false
     })
   }
   return state

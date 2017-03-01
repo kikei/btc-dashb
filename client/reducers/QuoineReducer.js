@@ -13,6 +13,8 @@ const initialState = {
     datetime: ''
   },
   positions: [],
+  accountLoading: true,
+  positionsLoading: true
 }
 
 export function quoineReducer(state=initialState, action) {
@@ -29,7 +31,9 @@ export function quoineReducer(state=initialState, action) {
         bid: payload.tick.bid,
         datetime: payload.tick.datetime
       },
-      positions: payload.positions.concat()
+      positions: payload.positions.concat(),
+      accountLoading: false,
+      positionsLoading: false
     })
   }
   return state

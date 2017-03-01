@@ -3,11 +3,16 @@ import ReactDOM from 'react-dom'
 import { combineReducers, createStore, applyMiddleware } from 'redux'
 import { Provider } from 'react-redux'
 import thunk from 'redux-thunk'
-import { Router, Route, IndexRoute, browserHistory } from 'react-router'
+import { Router, Route, DefaultRoute, IndexRoute, browserHistory } from 'react-router'
 import { syncHistoryWithStore, routerReducer, LOCATION_CHANGE } from 'react-router-redux'
 
-/* MainApp */
-import { MainApp } from './components/MainApp'
+/* Authentication */
+import { GuestApp } from './components/GuestApp'
+import LoggedInApp from './components/LoggedInApp'
+
+/* Login */
+import Login from './components/Login'
+import { loginReducer, loginConstants } from './reducers/LoginReducer'
 
 /* Home */
 import Home from './components/Home'
@@ -29,8 +34,31 @@ import { positionsReducer, positionsConstants } from './reducers/PositionsReduce
 import Quoine from './components/Quoine'
 import { quoineReducer, quoineConstants } from './reducers/QuoineReducer'
 
-const fetchFlags = dispatch => {
-  fetch('/api/flags')
+const fetchProtected = (url, token) => {
+  return fetch(url, {
+    headers: {
+      'Authorization': 'JWT ' + token
+    }
+  })
+}
+
+const fetchAccount = token => dispatch => {
+  fetchProtected('/auth/account', token)
+    .then(response => response.json())
+    .then(json => {
+      console.log('account', json)
+      dispatch({
+        type: mainConstants.SET_ACCOUNT,
+        payload: json
+      })
+    })
+    .catch(error => {
+      console.error('error in authentication', error)
+    })
+}
+
+const fetchFlags = token => dispatch => {
+  fetchProtected('/api/flags', token)
     .then(response => response.json())
     .then(json => {
       console.log('flags fetched', json)
@@ -46,8 +74,8 @@ const fetchFlags = dispatch => {
     })
 }
 
-const fetchAssets = dispatch => {
-  fetch('/api/assets')
+const fetchAssets = token => dispatch => {
+  fetchProtected('/api/assets', token)
     .then(response => response.json())
     .then(json => {
       console.log('assets fetched', json)
@@ -63,8 +91,8 @@ const fetchAssets = dispatch => {
     })
 }
 
-const fetchConditions = dispatch => {
-  fetch('/api/conditions')
+const fetchConditions = token => dispatch => {
+  fetchProtected('/api/conditions', token)
     .then(response => response.json())
     .then(json => {
       console.log('conditions fetched', json)
@@ -78,8 +106,8 @@ const fetchConditions = dispatch => {
     })
 }
 
-const fetchTicks = dispatch => {
-  fetch('/api/ticks')
+const fetchTicks = token => dispatch => {
+  fetchProtected('/api/ticks', token)
     .then(response => response.json())
     .then(json => {
       console.log('ticks fetched', json)
@@ -93,8 +121,8 @@ const fetchTicks = dispatch => {
     })
 }
 
-const fetchPositions = dispatch => {
-  fetch('/api/positions')
+const fetchPositions = token => dispatch => {
+  fetchProtected('/api/positions', token)
     .then(response => response.json())
     .then(json => {
       console.log('positions fetched', json)
@@ -108,8 +136,8 @@ const fetchPositions = dispatch => {
     })
 }
 
-const fetchQuoine = dispatch => {
-  fetch('/api/exchangers/quoine')
+const fetchQuoine = token => dispatch => {
+  fetchProtected('/api/exchangers/quoine', token)
     .then(response => response.json())
     .then(json => {
       console.log('quoine fetched', json)
@@ -121,6 +149,39 @@ const fetchQuoine = dispatch => {
     .catch(error => {
       console.error('error in fetching quoine', error)
     })
+}
+
+const postLogin = ({ username, password }) => dispatch => {
+  const body = {
+    username: username,
+    password: password
+  }
+  fetch('/auth', {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+    .then(response => response.json())
+    .then(json => {
+      console.log('login posted', json)
+      dispatch({
+        type: mainConstants.SET_ACCESS_TOKEN,
+        payload: json['access_token']
+      })
+      store.dispatch(browserHistory.push('/'))
+    })
+    .catch(error => {
+      console.error('error in login', error)
+    })
+}
+
+const doLogout = () => dispatch => {
+  localStorage.setItem('access_token', null)
+  setTimeout(() => {
+    store.dispatch(browserHistory.push('/login'))
+  }, 1000)
 }
 
 const postChangeFlag = ({ key, value}) => dispatch => {
@@ -184,30 +245,62 @@ const deleteCondition = diff => dispatch => {
     })
 }
 
+const requireToken = (store, dispatcher) => {
+  /*
+  const token = store.getState().token
+  */
+  const token = localStorage.getItem('access_token')
+  console.log('token', token)
+  if (!token) {
+    store.dispatch(browserHistory.push('/login'))
+  } else {
+    dispatcher(token)
+  }
+}
+
 const serverApiMiddleware = store => next => {
   return action => {
     if (!action) return;
     if (action.type == LOCATION_CHANGE) {
+      console.log('state.getState()', store.getState())
+      console.log('action', action)
       switch (action.payload.pathname) {
+      case '/login': {
+        break
+      }
+      case '/logout': {
+        store.dispatch(doLogout())
+        break
+      }
       case '/': {
-        store.dispatch(fetchFlags)
-        store.dispatch(fetchAssets)
+        requireToken(store, token => {
+          store.dispatch(fetchFlags(token))
+          store.dispatch(fetchAssets(token))
+        })
         break
       }
       case '/conditions': {
-        store.dispatch(fetchConditions)
+        requireToken(store, token => {
+          store.dispatch(fetchConditions(token))
+        })
         break
       }
       case '/ticks': {
-        store.dispatch(fetchTicks)
+        requireToken(store, token => {
+          store.dispatch(fetchTicks(token))
+        })
         break
       }
       case '/positions': {
-        store.dispatch(fetchPositions)
+        requireToken(store, token => {
+          store.dispatch(fetchPositions(token))
+        })
         break
       }
       case '/exchangers/quoine': {
-        store.dispatch(fetchQuoine)
+        requireToken(store, token => {
+          store.dispatch(fetchQuoine(token))
+        })
         break
       }
       /*
@@ -220,6 +313,8 @@ const serverApiMiddleware = store => next => {
       default:
         console.info('unknown pathname:', action.payload.pathname)
       }
+    } else if (action.type == loginConstants.REQUEST_LOGIN) {
+      store.dispatch(postLogin(action.payload))
     } else if (action.type == homeConstants.REQUEST_CHANGE_FLAG) {
       store.dispatch(postChangeFlag(action.payload))
     } else if (action.type == conditionsConstants.REQUEST_ADD_CONDITION) {
@@ -231,16 +326,32 @@ const serverApiMiddleware = store => next => {
   }
 }
 
-const initialState = {
-  number: 1
+class mainConstants {
+  static SET_ACCESS_TOKEN = "MAIN_SET_ACCESS_TOKEN"
+  static SET_ACCOUNT = 'MAIN_SET_ACCOUNT'
 }
+
+const initialState = {
+  number: 1,
+  token: localStorage.getItem('token')
+}
+
 function mainReducer(state=initialState, action) {
   console.log('mainReducer', state, action)
+  const { type, payload } = action
+  if (type == mainConstants.SET_ACCESS_TOKEN) {
+    localStorage.setItem('access_token', payload)
+  } else if (type == mainConstants.SET_ACCOUNT) {
+    return Object.assign({}, state, {
+      accounts: payload
+    })
+  }
   return state
 }
 
 const reducers = combineReducers({
   main: mainReducer,
+  login: loginReducer,
   flags: homeReducer,
   conditions: conditionsReducer,
   ticks: ticksReducer,
@@ -261,21 +372,51 @@ const NotFound = React.createClass({
         <div>
           <span>Page Not Found</span>
         </div>
-    );
+    )
   }
 })
+
+const Logout = React.createClass({
+  render: function() {
+    return (
+        <div>
+          <span>Logging out...</span>
+        </div>
+    )
+  }
+})
+
+function requireLogin(state, transition) {
+  console.log('requireLogin', state)
+  const token = localStorage.getItem('access_token')
+  if (!token) {
+    transition({
+      pathname: '/login',
+      state: { nextPathname: state.location.pathname }
+    })
+  }
+}
 
 ReactDOM.render(
   <Provider store={store}>
     <Router history={history}>
-      <Route path="/" component={MainApp}>
-        <IndexRoute component={Home}/>
-        <Route path="/conditions" component={Conditions} />
-        <Route path="/ticks" component={Ticks} />
-        <Route path="/positions" component={Positions} />
-        <Route path="/exchangers/quoine" component={Quoine} />
-        <Route path="*" component={NotFound} />
+      <Route component={GuestApp}>
+        <Route path="login" component={Login} />
+        <Route path="logout" component={Logout} />
       </Route>
+      <Route path="/" component={LoggedInApp}>
+        <IndexRoute onEnter={requireLogin}
+               component={Home}/>
+        <Route path="conditions" onEnter={requireLogin}
+               component={Conditions} />
+        <Route path="ticks" onEnter={requireLogin}
+               component={Ticks} />
+        <Route path="positions" onEnter={requireLogin}
+               component={Positions} />
+        <Route path="exchangers/quoine" onEnter={requireLogin}
+               component={Quoine} />
+      </Route>
+      <Route path="*" component={NotFound} />
     </Router>
   </Provider>,
   document.getElementById('dashboard-app')

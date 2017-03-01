@@ -1,10 +1,18 @@
-import React from 'react'
-import { Link, browserHistory } from 'react-router'
+import { Component } from 'react'
+import { Link } from 'react-router'
+import { connect } from 'react-redux'
 
-export const MainApp = React.createClass({
-  render: function() {
+class LoggedInApp extends Component {
+  render() {
+    const { state } = this.props
+    console.log('LoggedInApp', this)
     return (
         <div className="container">
+          <div style={{ position: "absolute", top: "0px", 
+                        textAlign: "right"  }}
+               className="u-full-width">
+            <Link to="/logout">Logout</Link>
+          </div>
           <header>
             <h1>BitcoinArb Dashboard</h1>
             <nav className="navbar">
@@ -49,31 +57,16 @@ export const MainApp = React.createClass({
             </nav>
           </header>
           <div>
-            { this.props.children }
+          { this.props.children }
           </div>
         </div>
     )
   }
-})
-
-/*
-export default function App({ children }) {
-  return (
-    <div>
-      <header>
-        Links:
-        {' '}
-        <Link to="/">Home</Link>
-        {' '}
-        <Link to="/foo">Foo</Link>
-        {' '}
-        <Link to="/bar">Bar</Link>
-      </header>
-      <div>
-        <button onClick={() => browserHistory.push('/foo')}>Go to /foo</button>
-      </div>
-      <div style={{ marginTop: '1.5em' }}>{children}</div>
-    </div>
-  )
 }
-*/
+
+function mapStateToProps(state) {
+  return state
+}
+
+export default connect(mapStateToProps, {
+})(LoggedInApp)

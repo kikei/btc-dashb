@@ -2,6 +2,7 @@ import { Component } from 'react'
 import { connect } from 'react-redux'
 
 import { conditionsConstants } from '../reducers/ConditionsReducer'
+import Loadable from './Loadable'
 
 class Conditions extends Component {
   changeDiff(e) {
@@ -49,7 +50,7 @@ class Conditions extends Component {
     const Viewer = (
       <div>
         <h2>Conditions</h2>
-        <div>
+        <Loadable loading={state.conditionsLoading}>
           <table className="u-full-width">
             <thead>
               <tr>
@@ -62,7 +63,7 @@ class Conditions extends Component {
               {listConditions}
             </tbody>
           </table>
-        </div>
+        </Loadable>
       </div>
     )
     const Editor = (

@@ -2,6 +2,7 @@ import { Component } from 'react'
 import { connect } from 'react-redux'
 
 import { homeConstants } from '../reducers/HomeReducer'
+import Loadable from './Loadable'
 
 class Home extends Component {
   onOffClick(e) {
@@ -16,7 +17,7 @@ class Home extends Component {
     return (
         <div>
           <h2>Flags</h2>
-          <div>
+          <Loadable loading={state.flagsLoading}>
             <table className="u-full-width">
               <thead>
                 <tr>
@@ -35,9 +36,9 @@ class Home extends Component {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </Loadable>
           <h2>Assets</h2>
-          <div>
+          <Loadable loading={state.assetsLoading}>
             <table className="u-full-width">
               <thead>
                 <tr>
@@ -66,7 +67,7 @@ class Home extends Component {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </Loadable>
         </div>
     )
   }

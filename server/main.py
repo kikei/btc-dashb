@@ -1,8 +1,12 @@
+import datetime
 import logging
 import os
 import pymongo
 import sys
 import json
+import hashlib
+import flask
+from flask_jwt import JWT, jwt_required, current_identity
 
 CWD = os.path.dirname(os.path.abspath(__file__))
 
@@ -18,13 +22,52 @@ from market.Quoine import Quoine
 
 from Trader import get_tick_db
 
-import flask
-
 tick_db = get_tick_db(LocalProperties.MONGO_HOST,
                       LocalProperties.MONGO_PORT)
 models = models(tick_db)
 
 app = flask.Flask(__name__)
+
+class User(object):
+    def __init__(self, id, username, hashed_password):
+        self.id = id
+        self.username = username
+        self.hashed_password = hashed_password
+
+    def __str__(self):
+        return 'aaa'
+
+class Accounts(object):
+    def __init__(self):
+        self.users = [ User(1, 'fujii', '7d2478a937a51fc947bef2f0c10ad31f5b205619c860b983795515c2e841576825acba4a7eddf4569070f45cc9460ddd9b555f005651e98c964a88dc1c42950e') ]
+
+    def user_by_id(self, id):
+        it = filter(lambda u: u.id == id, self.users)
+        return next(it, None)
+
+    def lookup_user(self, username, password):
+        it = filter(lambda u: u.username == username, self.users)
+        user = next(it, None)
+        if user is not None and \
+           user.hashed_password == Accounts.digest_password(password):
+            return user
+        else:
+            return None    
+
+    @staticmethod
+    def digest_password(password):
+        return hashlib.sha512(password.encode('utf-8')).hexdigest()
+
+accounts = Accounts()
+
+def authenticate(username, password):
+    return accounts.lookup_user(username, password)
+
+def identity(payload):
+    user_id = payload['identity']
+    return accounts.user_by_id(user_id)
+
+jwt = JWT(app, authenticate, identity)
 
 def inner_product(A, B):
     return sum(a * b for (a, b) in zip(A, B))
@@ -40,12 +83,24 @@ def calc_profit(ask, bid, exchangers, ticks):
     profit_bid = ammount_bid - size_bid * ticks[bid]['ask']
     return profit_ask + profit_bid
 
+@app.route('/auth/account', methods=['GET'])
+@jwt_required()
+def get_account():
+    user = current_identity
+    account = {
+        'userid': user.id,
+        'username': user.username
+    }
+    return flask.jsonify(account)
+
 @app.route('/api/flags', methods=['GET'])
+@jwt_required()
 def get_on():
     onoff = models.Flags.get_is_on()
     return flask.jsonify({'onoff': onoff})
 
 @app.route('/api/flags/<string:key>', methods=['POST'])
+@jwt_required()
 def post_flag(key):
     inputed = json.loads(flask.request.data.decode())
     value = inputed['value']
@@ -56,6 +111,7 @@ def post_flag(key):
         flask.abort(404)
 
 @app.route('/api/assets', methods=['GET'])
+@jwt_required()
 def get_assets():
     bf = BitFlyer(tick_db)
     qn = Quoine(tick_db)
@@ -81,6 +137,7 @@ def get_assets():
     return flask.jsonify(assets)
 
 @app.route('/api/conditions', methods=['GET'])
+@jwt_required()
 def get_conditions():
     open_conditions = models.OpenConditions.all()
     close_profits = models.CloseProfits.all()
@@ -94,6 +151,7 @@ def get_conditions():
     return flask.jsonify({ 'conditions': conditions })
 
 @app.route('/api/conditions', methods=['POST'])
+@jwt_required()
 def post_conditions():
     inputed = json.loads(flask.request.data.decode())
     print(inputed)
@@ -107,17 +165,20 @@ def post_conditions():
     return flask.jsonify({ 'condition': condition })
 
 @app.route('/api/conditions/<int:diff>', methods=['DELETE'])
+@jwt_required()
 def delete_condition(diff):
     result = models.OpenConditions.delete(diff)
     result = models.CloseProfits.delete(diff)
     return flask.jsonify({ 'diff': diff })
  
 @app.route('/api/ticks', methods=['GET'])
+@jwt_required()
 def get_ticks():
     ticks = models.Ticks.one()
     return flask.jsonify({ 'exchangers': ticks })
 
 @app.route('/api/positions', methods=['GET'])
+@jwt_required()
 def get_positions():
     positions = models.Positions.all()
     ticks = models.Ticks.one()
@@ -128,6 +189,7 @@ def get_positions():
     return flask.jsonify({ 'positions': positions })
 
 @app.route('/api/exchangers/quoine', methods=['GET'])
+@jwt_required()
 def get_quoine():
     positions = models.Positions.all()
     ticks = models.Ticks.one()
@@ -187,4 +249,6 @@ def fallback(path):
 
 if __name__ == '__main__':
     app.debug = True # デバッグモード有効化
+    app.config['JWT_SECRET_KEY'] = 'bitcoin_dashboard_secret'
+    app.config['JWT_EXPIRATION_DELTA'] = datetime.timedelta(hours=12)
     app.run(host='0.0.0.0') # どこからでもアクセス可能に
