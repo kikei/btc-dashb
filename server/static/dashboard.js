@@ -27926,9 +27926,7 @@
 	        { className: 'container' },
 	        React.createElement(
 	          'div',
-	          { style: { position: "absolute", top: "0px",
-	              textAlign: "right" },
-	            className: 'u-full-width' },
+	          { className: 'accountbar' },
 	          React.createElement(
 	            _reactRouter.Link,
 	            { to: '/logout' },

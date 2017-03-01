@@ -8,9 +8,7 @@ class LoggedInApp extends Component {
     console.log('LoggedInApp', this)
     return (
         <div className="container">
-          <div style={{ position: "absolute", top: "0px", 
-                        textAlign: "right"  }}
-               className="u-full-width">
+          <div className="accountbar">
             <Link to="/logout">Logout</Link>
           </div>
           <header>
