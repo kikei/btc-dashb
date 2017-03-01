@@ -1,5 +1,6 @@
 export class ticksConstants {
   static SET_TICKS = 'TICKS_SET_TICKS'
+  static SET_TICKS_LOADING = 'TICKS_SET_TICKS_LOADING'
 }
 
 const initialState = {
@@ -15,6 +16,10 @@ export function ticksReducer(state=initialState, action) {
     return Object.assign({}, state, {
       exchangers: ticks,
       ticksLoading: false
+    })
+  } else if (type == ticksConstants.SET_TICKS_LOADING) {
+    return Object.assign({}, state, {
+      ticksLoading: payload
     })
   }
   return Object.assign({}, state)

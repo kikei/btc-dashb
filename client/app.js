@@ -106,6 +106,10 @@ const refreshToken = token => dispatch => {
 }
 
 const fetchFlags = token => dispatch => {
+  dispatch({
+    type: homeConstants.SET_FLAGS_LOADING,
+    payload: true
+  })
   fetchProtected(token, '/api/flags')
     .then(response => response.json())
     .then(json => {
@@ -123,6 +127,10 @@ const fetchFlags = token => dispatch => {
 }
 
 const fetchAssets = token => dispatch => {
+  dispatch({
+    type: homeConstants.SET_ASSETS_LOADING,
+    payload: true
+  })
   fetchProtected(token, '/api/assets')
     .then(response => response.json())
     .then(json => {
@@ -140,6 +148,10 @@ const fetchAssets = token => dispatch => {
 }
 
 const fetchConditions = token => dispatch => {
+  dispatch({
+    type: conditionsConstants.SET_CONDITIONS_LOADING,
+    payload: true
+  })
   fetchProtected(token, '/api/conditions')
     .then(response => response.json())
     .then(json => {
@@ -155,6 +167,10 @@ const fetchConditions = token => dispatch => {
 }
 
 const fetchTicks = token => dispatch => {
+  dispatch({
+    type: ticksConstants.SET_TICKS_LOADING,
+    payload: true
+  })
   fetchProtected(token, '/api/ticks')
     .then(response => response.json())
     .then(json => {
@@ -170,6 +186,10 @@ const fetchTicks = token => dispatch => {
 }
 
 const fetchPositions = token => dispatch => {
+  dispatch({
+    type: positionsConstants.SET_POSITIONS_LOADING,
+    payload: true
+  })
   fetchProtected(token, '/api/positions')
     .then(response => response.json())
     .then(json => {
@@ -185,6 +205,14 @@ const fetchPositions = token => dispatch => {
 }
 
 const fetchQuoine = token => dispatch => {
+  dispatch({
+    type: quoineConstants.SET_ACCOUNT_LOADING,
+    payload: true
+  })
+  dispatch({
+    type: quoineConstants.SET_POSITIONS_LOADING,
+    payload: true
+  })
   fetchProtected(token, '/api/exchangers/quoine')
     .then(response => response.json())
     .then(json => {

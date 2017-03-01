@@ -212,6 +212,10 @@
 	
 	var fetchFlags = function fetchFlags(token) {
 	  return function (dispatch) {
+	    dispatch({
+	      type: _HomeReducer.homeConstants.SET_FLAGS_LOADING,
+	      payload: true
+	    });
 	    fetchProtected(token, '/api/flags').then(function (response) {
 	      return response.json();
 	    }).then(function (json) {
@@ -230,6 +234,10 @@
 	
 	var fetchAssets = function fetchAssets(token) {
 	  return function (dispatch) {
+	    dispatch({
+	      type: _HomeReducer.homeConstants.SET_ASSETS_LOADING,
+	      payload: true
+	    });
 	    fetchProtected(token, '/api/assets').then(function (response) {
 	      return response.json();
 	    }).then(function (json) {
@@ -248,6 +256,10 @@
 	
 	var fetchConditions = function fetchConditions(token) {
 	  return function (dispatch) {
+	    dispatch({
+	      type: _ConditionsReducer.conditionsConstants.SET_CONDITIONS_LOADING,
+	      payload: true
+	    });
 	    fetchProtected(token, '/api/conditions').then(function (response) {
 	      return response.json();
 	    }).then(function (json) {
@@ -264,6 +276,10 @@
 	
 	var fetchTicks = function fetchTicks(token) {
 	  return function (dispatch) {
+	    dispatch({
+	      type: _TicksReducer.ticksConstants.SET_TICKS_LOADING,
+	      payload: true
+	    });
 	    fetchProtected(token, '/api/ticks').then(function (response) {
 	      return response.json();
 	    }).then(function (json) {
@@ -280,6 +296,10 @@
 	
 	var fetchPositions = function fetchPositions(token) {
 	  return function (dispatch) {
+	    dispatch({
+	      type: _PositionsReducer.positionsConstants.SET_POSITIONS_LOADING,
+	      payload: true
+	    });
 	    fetchProtected(token, '/api/positions').then(function (response) {
 	      return response.json();
 	    }).then(function (json) {
@@ -296,6 +316,14 @@
 	
 	var fetchQuoine = function fetchQuoine(token) {
 	  return function (dispatch) {
+	    dispatch({
+	      type: _QuoineReducer.quoineConstants.SET_ACCOUNT_LOADING,
+	      payload: true
+	    });
+	    dispatch({
+	      type: _QuoineReducer.quoineConstants.SET_POSITIONS_LOADING,
+	      payload: true
+	    });
 	    fetchProtected(token, '/api/exchangers/quoine').then(function (response) {
 	      return response.json();
 	    }).then(function (json) {
@@ -28507,6 +28535,8 @@
 	homeConstants.CHANGE_FLAG = 'CHANGE_FLAG';
 	homeConstants.REQUEST_CHANGE_FLAG = 'HOME_REQUEST_CHANGE_FLAG';
 	homeConstants.FETCH_ASSETS = 'HOME_FETCH_ASSETS';
+	homeConstants.SET_FLAGS_LOADING = 'HOME_SET_FLAGS_LOADING';
+	homeConstants.SET_ASSETS_LOADING = 'HOME_SET_ASSETS_LOADING';
 	
 	
 	var initialFlagsState = {
@@ -28553,6 +28583,14 @@
 	    return Object.assign({}, state, {
 	      assets: assets,
 	      assetsLoading: false
+	    });
+	  } else if (type == homeConstants.SET_ASSETS_LOADING) {
+	    return Object.assign({}, state, {
+	      assetsLoading: payload
+	    });
+	  } else if (type == homeConstants.SET_FLAGS_LOADING) {
+	    return Object.assign({}, state, {
+	      flagsLoading: payload
 	    });
 	  }
 	  return state;
@@ -28931,6 +28969,7 @@
 	conditionsConstants.DELETE_CONDITION = 'CONDITION_DELETE_CONDITION';
 	conditionsConstants.REQUEST_ADD_CONDITION = 'CONDITION_REQUEST_ADD_CONDITION';
 	conditionsConstants.REQUEST_DELETE_CONDITION = 'CONDITION_REQUEST_DELETE_CONDITION';
+	conditionsConstants.SET_CONDITIONS_LOADING = 'CONDITION_SET_CONDITIONS_LOADING';
 	
 	
 	var initialState = {
@@ -28997,6 +29036,10 @@
 	    }();
 	
 	    if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+	  } else if (type == conditionsConstants.SET_CONDITIONS_LOADING) {
+	    return Object.assign({}, state, {
+	      conditionsLoading: payload
+	    });
 	  }
 	  return state;
 	}
@@ -29154,6 +29197,7 @@
 	};
 	
 	ticksConstants.SET_TICKS = 'TICKS_SET_TICKS';
+	ticksConstants.SET_TICKS_LOADING = 'TICKS_SET_TICKS_LOADING';
 	
 	
 	var initialState = {
@@ -29174,6 +29218,10 @@
 	    return Object.assign({}, state, {
 	      exchangers: ticks,
 	      ticksLoading: false
+	    });
+	  } else if (type == ticksConstants.SET_TICKS_LOADING) {
+	    return Object.assign({}, state, {
+	      ticksLoading: payload
 	    });
 	  }
 	  return Object.assign({}, state);
@@ -29476,6 +29524,7 @@
 	};
 	
 	positionsConstants.SET_POSITIONS = 'POSITIONS_SET_POSITIONS';
+	positionsConstants.SET_POSITIONS_LOADING = 'POSITIONS_SET_POSITIONS_LOADING';
 	
 	
 	var initialState = {
@@ -29496,6 +29545,10 @@
 	    return Object.assign({}, state, {
 	      positions: positions,
 	      positionsLoading: false
+	    });
+	  } else if (type == positionsConstants.SET_POSITIONS_LOADING) {
+	    return Object.assign({}, state, {
+	      positionsLoading: payload
 	    });
 	  }
 	  return state;
@@ -29975,6 +30028,8 @@
 	};
 	
 	quoineConstants.SET_EXCHANGER = 'QUOINE_SET_EXCHANGER';
+	quoineConstants.SET_ACCOUNT_LOADING = 'QUOINE_SET_ACCOUNT_LOADING';
+	quoineConstants.SET_POSITIONS_LOADING = 'QUOINE_SET_POSITIONS_LOADING';
 	
 	
 	var initialState = {
@@ -30014,6 +30069,14 @@
 	      positions: payload.positions.concat(),
 	      accountLoading: false,
 	      positionsLoading: false
+	    });
+	  } else if (type == quoineConstants.SET_ACCOUNT_LOADING) {
+	    return Object.assign({}, state, {
+	      accountLoading: payload
+	    });
+	  } else if (type == quoineConstants.SET_POSITIONS_LOADING) {
+	    return Object.assign({}, state, {
+	      positionsLoading: payload
 	    });
 	  }
 	  return state;

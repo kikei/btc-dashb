@@ -7,6 +7,7 @@ export class conditionsConstants {
   static DELETE_CONDITION = 'CONDITION_DELETE_CONDITION'
   static REQUEST_ADD_CONDITION = 'CONDITION_REQUEST_ADD_CONDITION'
   static REQUEST_DELETE_CONDITION = 'CONDITION_REQUEST_DELETE_CONDITION'
+  static SET_CONDITIONS_LOADING = 'CONDITION_SET_CONDITIONS_LOADING'
 }
 
 const initialState = {
@@ -55,6 +56,10 @@ export function conditionsReducer(state=initialState, action) {
     const diff = payload
     return Object.assign({}, state, {
       conditions: conditions.filter((e, i) => e.diff != diff)
+    })
+  } else if (type == conditionsConstants.SET_CONDITIONS_LOADING) {
+    return Object.assign({}, state, {
+      conditionsLoading: payload
     })
   }
   return state

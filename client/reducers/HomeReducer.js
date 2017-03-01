@@ -2,6 +2,8 @@ export class homeConstants {
   static CHANGE_FLAG = 'CHANGE_FLAG'
   static REQUEST_CHANGE_FLAG = 'HOME_REQUEST_CHANGE_FLAG'
   static FETCH_ASSETS = 'HOME_FETCH_ASSETS'
+  static SET_FLAGS_LOADING = 'HOME_SET_FLAGS_LOADING'
+  static SET_ASSETS_LOADING = 'HOME_SET_ASSETS_LOADING'
 }
 
 const initialFlagsState = {
@@ -41,6 +43,14 @@ export function homeReducer(state=initialFlagsState, action) {
     return Object.assign({}, state, {
       assets: assets,
       assetsLoading: false
+    })
+  } else if (type == homeConstants.SET_ASSETS_LOADING) {
+    return Object.assign({}, state, {
+      assetsLoading: payload
+    })
+  } else if (type == homeConstants.SET_FLAGS_LOADING) {
+    return Object.assign({}, state, {
+      flagsLoading: payload
     })
   }
   return state
