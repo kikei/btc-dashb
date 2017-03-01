@@ -37,10 +37,15 @@
     }
 }
 
+.error {
+    color: #f06033;
+}
+
 .loadable {
     position: relative;
 }
 
+/* loader */
 .loader,
 .loader:before,
 .loader:after {

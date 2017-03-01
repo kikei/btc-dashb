@@ -7,10 +7,12 @@ class Login extends Component {
   changeUsername(e) {
     e.preventDefault()
     this.props.setUsername(e.target.value)
+    this.props.clearError(null)
   }
   changePassword(e) {
     e.preventDefault()
     this.props.setPassword(e.target.value)
+    this.props.clearError(null)
   }
   clickLogin(e) {
     e.preventDefault()
@@ -35,6 +37,7 @@ class Login extends Component {
               value={state.editPassword} 
               className="u-full-width" />
           </div>
+          <div className="error">{state.error}</div>
           <div>
             <button onClick={this.clickLogin.bind(this)}
               className="button-primary u-full-width">
@@ -62,6 +65,10 @@ export default connect(mapStateToProps,
     setPassword: (password) => ({
       type: loginConstants.SET_PASSWORD,
       payload: password
+    }),
+    clearError: () => ({
+      type: loginConstants.SET_ERROR,
+      payload: null
     }),
     requestLogin: (username, password) => ({
       type: loginConstants.REQUEST_LOGIN,

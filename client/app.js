@@ -166,11 +166,18 @@ const postLogin = ({ username, password }) => dispatch => {
     .then(response => response.json())
     .then(json => {
       console.log('login posted', json)
-      dispatch({
-        type: mainConstants.SET_ACCESS_TOKEN,
-        payload: json['access_token']
-      })
-      store.dispatch(browserHistory.push('/'))
+      if (json['access_token']) {
+        dispatch({
+          type: mainConstants.SET_ACCESS_TOKEN,
+          payload: json['access_token']
+        })
+        store.dispatch(browserHistory.push('/'))
+      } else {
+        dispatch({
+          type: loginConstants.SET_ERROR,
+          payload: json['description']
+        })
+      }
     })
     .catch(error => {
       console.error('error in login', error)

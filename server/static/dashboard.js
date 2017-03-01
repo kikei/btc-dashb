@@ -275,11 +275,18 @@
 	      return response.json();
 	    }).then(function (json) {
 	      console.log('login posted', json);
-	      dispatch({
-	        type: mainConstants.SET_ACCESS_TOKEN,
-	        payload: json['access_token']
-	      });
-	      store.dispatch(_reactRouter.browserHistory.push('/'));
+	      if (json['access_token']) {
+	        dispatch({
+	          type: mainConstants.SET_ACCESS_TOKEN,
+	          payload: json['access_token']
+	        });
+	        store.dispatch(_reactRouter.browserHistory.push('/'));
+	      } else {
+	        dispatch({
+	          type: _LoginReducer.loginConstants.SET_ERROR,
+	          payload: json['description']
+	        });
+	      }
 	    })['catch'](function (error) {
 	      console.error('error in login', error);
 	    });
@@ -28085,12 +28092,14 @@
 	    value: function changeUsername(e) {
 	      e.preventDefault();
 	      this.props.setUsername(e.target.value);
+	      this.props.clearError(null);
 	    }
 	  }, {
 	    key: 'changePassword',
 	    value: function changePassword(e) {
 	      e.preventDefault();
 	      this.props.setPassword(e.target.value);
+	      this.props.clearError(null);
 	    }
 	  }, {
 	    key: 'clickLogin',
@@ -28140,6 +28149,11 @@
 	          ),
 	          React.createElement(
 	            'div',
+	            { className: 'error' },
+	            state.error
+	          ),
+	          React.createElement(
+	            'div',
 	            null,
 	            React.createElement(
 	              'button',
@@ -28175,6 +28189,12 @@
 	      payload: password
 	    };
 	  },
+	  clearError: function clearError() {
+	    return {
+	      type: _LoginReducer.loginConstants.SET_ERROR,
+	      payload: null
+	    };
+	  },
 	  requestLogin: function requestLogin(username, password) {
 	    return {
 	      type: _LoginReducer.loginConstants.REQUEST_LOGIN,
@@ -28203,11 +28223,13 @@
 	loginConstants.SET_USERNAME = "LOGIN_CHANGE_USERNAME";
 	loginConstants.SET_PASSWORD = "LOGIN_CHANGE_PASSWORD";
 	loginConstants.REQUEST_LOGIN = "LOGIN_REQUEST_LOGIN";
+	loginConstants.SET_ERROR = "LOGING_SET_ERROR";
 	
 	
 	var initialFlagsState = {
 	  editUsername: '',
-	  editPassword: ''
+	  editPassword: '',
+	  error: null
 	};
 	
 	function loginReducer() {
@@ -28225,6 +28247,10 @@
 	  } else if (type == loginConstants.SET_PASSWORD) {
 	    return Object.assign({}, state, {
 	      editPassword: payload
+	    });
+	  } else if (type == loginConstants.SET_ERROR) {
+	    return Object.assign({}, state, {
+	      error: payload
 	    });
 	  }
 	  return state;
