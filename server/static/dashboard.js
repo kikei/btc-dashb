@@ -133,24 +133,77 @@
 	/* Exchagers */
 	
 	
-	var fetchProtected = function fetchProtected(url, token) {
-	  return fetch(url, {
-	    headers: {
-	      'Authorization': 'JWT ' + token
-	    }
-	  });
-	};
-	
-	var fetchAccount = function fetchAccount(token) {
+	var postLogin = function postLogin(_ref) {
+	  var username = _ref.username,
+	      password = _ref.password;
 	  return function (dispatch) {
-	    fetchProtected('/auth/account', token).then(function (response) {
+	    var body = {
+	      username: username,
+	      password: password
+	    };
+	    fetch('/auth', {
+	      method: 'POST',
+	      body: JSON.stringify(body),
+	      headers: {
+	        'Content-Type': 'application/json'
+	      }
+	    }).then(function (response) {
 	      return response.json();
 	    }).then(function (json) {
-	      console.log('account', json);
-	      dispatch({
-	        type: mainConstants.SET_ACCOUNT,
-	        payload: json
-	      });
+	      console.log('login posted', json);
+	      if (json['access_token']) {
+	        dispatch({
+	          type: mainConstants.SET_ACCESS_TOKEN,
+	          payload: json['access_token']
+	        });
+	        store.dispatch(_reactRouter.browserHistory.push('/'));
+	      } else {
+	        dispatch({
+	          type: _LoginReducer.loginConstants.SET_ERROR,
+	          payload: json['description']
+	        });
+	      }
+	    })['catch'](function (error) {
+	      console.error('error in login', error);
+	    });
+	  };
+	};
+	
+	var doLogout = function doLogout() {
+	  return function (dispatch) {
+	    localStorage.setItem('access_token', null);
+	    setTimeout(function () {
+	      store.dispatch(_reactRouter.browserHistory.push('/login'));
+	    }, 1000);
+	  };
+	};
+	
+	var fetchProtected = function fetchProtected(url, token, data) {
+	  var def = {
+	    headers: {
+	      'Authorization': 'JWT ' + token,
+	      'Content-Type': 'application/json'
+	    }
+	  };
+	  return fetch(url, Object.assign(def, data));
+	};
+	
+	var refreshToken = function refreshToken(token) {
+	  return function (dispatch) {
+	    fetchProtected('/auth/refresh', token, {
+	      'method': 'POST'
+	    }).then(function (response) {
+	      return response.json();
+	    }).then(function (json) {
+	      console.log('token refreshed', json);
+	      if (json['access_token']) {
+	        dispatch({
+	          type: mainConstants.SET_ACCESS_TOKEN,
+	          payload: json['access_token']
+	        });
+	      } else {
+	        dispatch(_reactRouter.browserHistory.push('/login'));
+	      }
 	    })['catch'](function (error) {
 	      console.error('error in authentication', error);
 	    });
@@ -254,51 +307,6 @@
 	    })['catch'](function (error) {
 	      console.error('error in fetching quoine', error);
 	    });
-	  };
-	};
-	
-	var postLogin = function postLogin(_ref) {
-	  var username = _ref.username,
-	      password = _ref.password;
-	  return function (dispatch) {
-	    var body = {
-	      username: username,
-	      password: password
-	    };
-	    fetch('/auth', {
-	      method: 'POST',
-	      body: JSON.stringify(body),
-	      headers: {
-	        'Content-Type': 'application/json'
-	      }
-	    }).then(function (response) {
-	      return response.json();
-	    }).then(function (json) {
-	      console.log('login posted', json);
-	      if (json['access_token']) {
-	        dispatch({
-	          type: mainConstants.SET_ACCESS_TOKEN,
-	          payload: json['access_token']
-	        });
-	        store.dispatch(_reactRouter.browserHistory.push('/'));
-	      } else {
-	        dispatch({
-	          type: _LoginReducer.loginConstants.SET_ERROR,
-	          payload: json['description']
-	        });
-	      }
-	    })['catch'](function (error) {
-	      console.error('error in login', error);
-	    });
-	  };
-	};
-	
-	var doLogout = function doLogout() {
-	  return function (dispatch) {
-	    localStorage.setItem('access_token', null);
-	    setTimeout(function () {
-	      store.dispatch(_reactRouter.browserHistory.push('/login'));
-	    }, 1000);
 	  };
 	};
 	
@@ -535,16 +543,21 @@
 	  }
 	});
 	
-	function requireLogin(state, transition) {
-	  console.log('requireLogin', state);
-	  var token = localStorage.getItem('access_token');
-	  if (!token) {
-	    transition({
-	      pathname: '/login',
-	      state: { nextPathname: state.location.pathname }
-	    });
-	  }
-	}
+	var requireLogin = function requireLogin(store) {
+	  return function (state, transition) {
+	    // console.log('requireLogin', state)
+	    var token = localStorage.getItem('access_token');
+	    if (!token) {
+	      transition({
+	        pathname: '/login',
+	        state: { nextPathname: state.location.pathname }
+	      });
+	    } else {
+	      console.log('=======================================');
+	      store.dispatch(refreshToken(token));
+	    }
+	  };
+	};
 	
 	_reactDom2['default'].render(_react2['default'].createElement(
 	  _reactRedux.Provider,
@@ -563,13 +576,13 @@
 	      { path: '/', component: _LoggedInApp2['default'] },
 	      _react2['default'].createElement(_reactRouter.IndexRoute, { onEnter: requireLogin,
 	        component: _Home2['default'] }),
-	      _react2['default'].createElement(_reactRouter.Route, { path: 'conditions', onEnter: requireLogin,
+	      _react2['default'].createElement(_reactRouter.Route, { path: 'conditions', onEnter: requireLogin(store),
 	        component: _Conditions2['default'] }),
-	      _react2['default'].createElement(_reactRouter.Route, { path: 'ticks', onEnter: requireLogin,
+	      _react2['default'].createElement(_reactRouter.Route, { path: 'ticks', onEnter: requireLogin(store),
 	        component: _Ticks2['default'] }),
-	      _react2['default'].createElement(_reactRouter.Route, { path: 'positions', onEnter: requireLogin,
+	      _react2['default'].createElement(_reactRouter.Route, { path: 'positions', onEnter: requireLogin(store),
 	        component: _Positions2['default'] }),
-	      _react2['default'].createElement(_reactRouter.Route, { path: 'exchangers/quoine', onEnter: requireLogin,
+	      _react2['default'].createElement(_reactRouter.Route, { path: 'exchangers/quoine', onEnter: requireLogin(store),
 	        component: _Quoine2['default'] })
 	    ),
 	    _react2['default'].createElement(_reactRouter.Route, { path: '*', component: NotFound })

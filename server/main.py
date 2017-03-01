@@ -86,6 +86,14 @@ def calc_profit(ask, bid, exchangers, ticks):
     profit_bid = ammount_bid - size_bid * ticks[bid]['ask']
     return profit_ask + profit_bid
 
+@app.route('/auth/refresh', methods=['POST'])
+@jwt_required()
+def refresh():
+    user = current_identity
+    token = jwt.jwt_encode_callback(user)
+    access_token = token.decode('utf-8')
+    return flask.jsonify({ 'access_token': access_token })
+
 @app.route('/auth/account', methods=['GET'])
 @jwt_required()
 def get_account():

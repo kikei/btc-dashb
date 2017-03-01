@@ -34,23 +34,71 @@ import { positionsReducer, positionsConstants } from './reducers/PositionsReduce
 import Quoine from './components/Quoine'
 import { quoineReducer, quoineConstants } from './reducers/QuoineReducer'
 
-const fetchProtected = (url, token) => {
-  return fetch(url, {
+const postLogin = ({ username, password }) => dispatch => {
+  const body = {
+    username: username,
+    password: password
+  }
+  fetch('/auth', {
+    method: 'POST',
+    body: JSON.stringify(body),
     headers: {
-      'Authorization': 'JWT ' + token
+      'Content-Type': 'application/json'
     }
   })
-}
-
-const fetchAccount = token => dispatch => {
-  fetchProtected('/auth/account', token)
     .then(response => response.json())
     .then(json => {
-      console.log('account', json)
-      dispatch({
-        type: mainConstants.SET_ACCOUNT,
-        payload: json
-      })
+      console.log('login posted', json)
+      if (json['access_token']) {
+        dispatch({
+          type: mainConstants.SET_ACCESS_TOKEN,
+          payload: json['access_token']
+        })
+        store.dispatch(browserHistory.push('/'))
+      } else {
+        dispatch({
+          type: loginConstants.SET_ERROR,
+          payload: json['description']
+        })
+      }
+    })
+    .catch(error => {
+      console.error('error in login', error)
+    })
+}
+
+const doLogout = () => dispatch => {
+  localStorage.setItem('access_token', null)
+  setTimeout(() => {
+    store.dispatch(browserHistory.push('/login'))
+  }, 1000)
+}
+
+const fetchProtected = (url, token, data) => {
+  const def = {
+    headers: {
+      'Authorization': 'JWT ' + token,
+      'Content-Type': 'application/json'
+    }
+  }
+  return fetch(url, Object.assign(def, data))
+}
+
+const refreshToken = token => dispatch => {
+  fetchProtected('/auth/refresh', token, {
+    'method': 'POST'
+  })
+    .then(response => response.json())
+    .then(json => {
+      console.log('token refreshed', json)
+      if (json['access_token']) {
+        dispatch({
+          type: mainConstants.SET_ACCESS_TOKEN,
+          payload: json['access_token']
+        })
+      } else {
+        dispatch(browserHistory.push('/login'))
+      }
     })
     .catch(error => {
       console.error('error in authentication', error)
@@ -149,46 +197,6 @@ const fetchQuoine = token => dispatch => {
     .catch(error => {
       console.error('error in fetching quoine', error)
     })
-}
-
-const postLogin = ({ username, password }) => dispatch => {
-  const body = {
-    username: username,
-    password: password
-  }
-  fetch('/auth', {
-    method: 'POST',
-    body: JSON.stringify(body),
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-    .then(response => response.json())
-    .then(json => {
-      console.log('login posted', json)
-      if (json['access_token']) {
-        dispatch({
-          type: mainConstants.SET_ACCESS_TOKEN,
-          payload: json['access_token']
-        })
-        store.dispatch(browserHistory.push('/'))
-      } else {
-        dispatch({
-          type: loginConstants.SET_ERROR,
-          payload: json['description']
-        })
-      }
-    })
-    .catch(error => {
-      console.error('error in login', error)
-    })
-}
-
-const doLogout = () => dispatch => {
-  localStorage.setItem('access_token', null)
-  setTimeout(() => {
-    store.dispatch(browserHistory.push('/login'))
-  }, 1000)
 }
 
 const postChangeFlag = ({ key, value}) => dispatch => {
@@ -393,14 +401,16 @@ const Logout = React.createClass({
   }
 })
 
-function requireLogin(state, transition) {
-  console.log('requireLogin', state)
+let requireLogin = (store) => (state, transition) => {
+  // console.log('requireLogin', state)
   const token = localStorage.getItem('access_token')
   if (!token) {
     transition({
       pathname: '/login',
       state: { nextPathname: state.location.pathname }
     })
+  } else {
+    store.dispatch(refreshToken(token))
   }
 }
 
@@ -414,13 +424,13 @@ ReactDOM.render(
       <Route path="/" component={LoggedInApp}>
         <IndexRoute onEnter={requireLogin}
                component={Home}/>
-        <Route path="conditions" onEnter={requireLogin}
+        <Route path="conditions" onEnter={requireLogin(store)}
                component={Conditions} />
-        <Route path="ticks" onEnter={requireLogin}
+        <Route path="ticks" onEnter={requireLogin(store)}
                component={Ticks} />
-        <Route path="positions" onEnter={requireLogin}
+        <Route path="positions" onEnter={requireLogin(store)}
                component={Positions} />
-        <Route path="exchangers/quoine" onEnter={requireLogin}
+        <Route path="exchangers/quoine" onEnter={requireLogin(store)}
                component={Quoine} />
       </Route>
       <Route path="*" component={NotFound} />
