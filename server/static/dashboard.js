@@ -178,7 +178,7 @@
 	  };
 	};
 	
-	var fetchProtected = function fetchProtected(url, token, data) {
+	var fetchProtected = function fetchProtected(token, url, data) {
 	  var def = {
 	    headers: {
 	      'Authorization': 'JWT ' + token,
@@ -190,7 +190,7 @@
 	
 	var refreshToken = function refreshToken(token) {
 	  return function (dispatch) {
-	    fetchProtected('/auth/refresh', token, {
+	    fetchProtected(token, '/auth/refresh', {
 	      'method': 'POST'
 	    }).then(function (response) {
 	      return response.json();
@@ -212,7 +212,7 @@
 	
 	var fetchFlags = function fetchFlags(token) {
 	  return function (dispatch) {
-	    fetchProtected('/api/flags', token).then(function (response) {
+	    fetchProtected(token, '/api/flags').then(function (response) {
 	      return response.json();
 	    }).then(function (json) {
 	      console.log('flags fetched', json);
@@ -230,7 +230,7 @@
 	
 	var fetchAssets = function fetchAssets(token) {
 	  return function (dispatch) {
-	    fetchProtected('/api/assets', token).then(function (response) {
+	    fetchProtected(token, '/api/assets').then(function (response) {
 	      return response.json();
 	    }).then(function (json) {
 	      console.log('assets fetched', json);
@@ -248,7 +248,7 @@
 	
 	var fetchConditions = function fetchConditions(token) {
 	  return function (dispatch) {
-	    fetchProtected('/api/conditions', token).then(function (response) {
+	    fetchProtected(token, '/api/conditions').then(function (response) {
 	      return response.json();
 	    }).then(function (json) {
 	      console.log('conditions fetched', json);
@@ -264,7 +264,7 @@
 	
 	var fetchTicks = function fetchTicks(token) {
 	  return function (dispatch) {
-	    fetchProtected('/api/ticks', token).then(function (response) {
+	    fetchProtected(token, '/api/ticks').then(function (response) {
 	      return response.json();
 	    }).then(function (json) {
 	      console.log('ticks fetched', json);
@@ -280,7 +280,7 @@
 	
 	var fetchPositions = function fetchPositions(token) {
 	  return function (dispatch) {
-	    fetchProtected('/api/positions', token).then(function (response) {
+	    fetchProtected(token, '/api/positions').then(function (response) {
 	      return response.json();
 	    }).then(function (json) {
 	      console.log('positions fetched', json);
@@ -296,7 +296,7 @@
 	
 	var fetchQuoine = function fetchQuoine(token) {
 	  return function (dispatch) {
-	    fetchProtected('/api/exchangers/quoine', token).then(function (response) {
+	    fetchProtected(token, '/api/exchangers/quoine').then(function (response) {
 	      return response.json();
 	    }).then(function (json) {
 	      console.log('quoine fetched', json);
@@ -310,14 +310,14 @@
 	  };
 	};
 	
-	var postChangeFlag = function postChangeFlag(_ref2) {
+	var postChangeFlag = function postChangeFlag(token, _ref2) {
 	  var key = _ref2.key,
 	      value = _ref2.value;
 	  return function (dispatch) {
 	    var body = {
 	      value: value
 	    };
-	    fetch('/api/flags/' + key, {
+	    fetchProtected(token, '/api/flags/' + key, {
 	      method: 'POST',
 	      body: JSON.stringify(body)
 	    }).then(function (response) {
@@ -334,14 +334,14 @@
 	  };
 	};
 	
-	var postCondition = function postCondition(condition) {
+	var postCondition = function postCondition(token, condition) {
 	  return function (dispatch) {
 	    var body = {
 	      diff: condition.diff,
 	      lots: condition.lots,
 	      profit: condition.profit
 	    };
-	    fetch('/api/conditions', {
+	    fetchProtected(token, '/api/conditions', {
 	      method: 'POST',
 	      body: JSON.stringify(body)
 	    }).then(function (response) {
@@ -358,9 +358,9 @@
 	  };
 	};
 	
-	var deleteCondition = function deleteCondition(diff) {
+	var deleteCondition = function deleteCondition(token, diff) {
 	  return function (dispatch) {
-	    fetch('/api/conditions/' + diff, {
+	    fetchProtected(token, '/api/conditions/' + diff, {
 	      method: 'DELETE'
 	    }).then(function (response) {
 	      return response.json();
@@ -455,11 +455,17 @@
 	      } else if (action.type == _LoginReducer.loginConstants.REQUEST_LOGIN) {
 	        store.dispatch(postLogin(action.payload));
 	      } else if (action.type == _HomeReducer.homeConstants.REQUEST_CHANGE_FLAG) {
-	        store.dispatch(postChangeFlag(action.payload));
+	        requireToken(store, function (token) {
+	          store.dispatch(postChangeFlag(token, action.payload));
+	        });
 	      } else if (action.type == _ConditionsReducer.conditionsConstants.REQUEST_ADD_CONDITION) {
-	        store.dispatch(postCondition(action.payload));
+	        requireToken(store, function (token) {
+	          store.dispatch(postCondition(token, action.payload));
+	        });
 	      } else if (action.type == _ConditionsReducer.conditionsConstants.REQUEST_DELETE_CONDITION) {
-	        store.dispatch(deleteCondition(action.payload));
+	        requireToken(store, function (token) {
+	          store.dispatch(deleteCondition(token, action.payload));
+	        });
 	      }
 	      return next(action);
 	    };
@@ -553,7 +559,6 @@
 	        state: { nextPathname: state.location.pathname }
 	      });
 	    } else {
-	      console.log('=======================================');
 	      store.dispatch(refreshToken(token));
 	    }
 	  };

@@ -74,7 +74,7 @@ const doLogout = () => dispatch => {
   }, 1000)
 }
 
-const fetchProtected = (url, token, data) => {
+const fetchProtected = (token, url, data) => {
   const def = {
     headers: {
       'Authorization': 'JWT ' + token,
@@ -85,7 +85,7 @@ const fetchProtected = (url, token, data) => {
 }
 
 const refreshToken = token => dispatch => {
-  fetchProtected('/auth/refresh', token, {
+  fetchProtected(token, '/auth/refresh', {
     'method': 'POST'
   })
     .then(response => response.json())
@@ -106,7 +106,7 @@ const refreshToken = token => dispatch => {
 }
 
 const fetchFlags = token => dispatch => {
-  fetchProtected('/api/flags', token)
+  fetchProtected(token, '/api/flags')
     .then(response => response.json())
     .then(json => {
       console.log('flags fetched', json)
@@ -123,7 +123,7 @@ const fetchFlags = token => dispatch => {
 }
 
 const fetchAssets = token => dispatch => {
-  fetchProtected('/api/assets', token)
+  fetchProtected(token, '/api/assets')
     .then(response => response.json())
     .then(json => {
       console.log('assets fetched', json)
@@ -140,7 +140,7 @@ const fetchAssets = token => dispatch => {
 }
 
 const fetchConditions = token => dispatch => {
-  fetchProtected('/api/conditions', token)
+  fetchProtected(token, '/api/conditions')
     .then(response => response.json())
     .then(json => {
       console.log('conditions fetched', json)
@@ -155,7 +155,7 @@ const fetchConditions = token => dispatch => {
 }
 
 const fetchTicks = token => dispatch => {
-  fetchProtected('/api/ticks', token)
+  fetchProtected(token, '/api/ticks')
     .then(response => response.json())
     .then(json => {
       console.log('ticks fetched', json)
@@ -170,7 +170,7 @@ const fetchTicks = token => dispatch => {
 }
 
 const fetchPositions = token => dispatch => {
-  fetchProtected('/api/positions', token)
+  fetchProtected(token, '/api/positions')
     .then(response => response.json())
     .then(json => {
       console.log('positions fetched', json)
@@ -185,7 +185,7 @@ const fetchPositions = token => dispatch => {
 }
 
 const fetchQuoine = token => dispatch => {
-  fetchProtected('/api/exchangers/quoine', token)
+  fetchProtected(token, '/api/exchangers/quoine')
     .then(response => response.json())
     .then(json => {
       console.log('quoine fetched', json)
@@ -199,11 +199,11 @@ const fetchQuoine = token => dispatch => {
     })
 }
 
-const postChangeFlag = ({ key, value}) => dispatch => {
+const postChangeFlag = (token, { key, value }) => dispatch => {
   const body = {
     value: value
   }
-  fetch('/api/flags/' + key, {
+  fetchProtected(token, '/api/flags/' + key, {
     method: 'POST',
     body: JSON.stringify(body)
   })
@@ -220,13 +220,13 @@ const postChangeFlag = ({ key, value}) => dispatch => {
     })
 }
 
-const postCondition = condition => dispatch => {
+const postCondition = (token, condition) => dispatch => {
   const body = {
     diff: condition.diff,
     lots: condition.lots,
     profit: condition.profit
   }
-  fetch('/api/conditions', {
+  fetchProtected(token, '/api/conditions', {
     method: 'POST', 
     body: JSON.stringify(body)
   })
@@ -243,8 +243,8 @@ const postCondition = condition => dispatch => {
     })
 }
 
-const deleteCondition = diff => dispatch => {
-  fetch('/api/conditions/' + diff, {
+const deleteCondition = (token, diff) => dispatch => {
+  fetchProtected(token, '/api/conditions/' + diff, {
     method: 'DELETE'
   })
     .then(response => response.json())
@@ -331,11 +331,17 @@ const serverApiMiddleware = store => next => {
     } else if (action.type == loginConstants.REQUEST_LOGIN) {
       store.dispatch(postLogin(action.payload))
     } else if (action.type == homeConstants.REQUEST_CHANGE_FLAG) {
-      store.dispatch(postChangeFlag(action.payload))
+      requireToken(store, token => {
+        store.dispatch(postChangeFlag(token, action.payload))
+      })
     } else if (action.type == conditionsConstants.REQUEST_ADD_CONDITION) {
-      store.dispatch(postCondition(action.payload))
+      requireToken(store, token => {
+        store.dispatch(postCondition(token, action.payload))
+      })
     } else if (action.type == conditionsConstants.REQUEST_DELETE_CONDITION) {
-      store.dispatch(deleteCondition(action.payload))
+      requireToken(store, token => {
+        store.dispatch(deleteCondition(token, action.payload))
+      })
     }
     return next(action)
   }
