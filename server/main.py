@@ -28,6 +28,9 @@ models = models(tick_db)
 
 app = flask.Flask(__name__)
 
+app.config['JWT_SECRET_KEY'] = 'bitcoin_dashboard_secret'
+app.config['JWT_EXPIRATION_DELTA'] = datetime.timedelta(hours=12)
+
 class User(object):
     def __init__(self, id, username, hashed_password):
         self.id = id
@@ -249,6 +252,4 @@ def fallback(path):
 
 if __name__ == '__main__':
     app.debug = True # デバッグモード有効化
-    app.config['JWT_SECRET_KEY'] = 'bitcoin_dashboard_secret'
-    app.config['JWT_EXPIRATION_DELTA'] = datetime.timedelta(hours=12)
     app.run(host='0.0.0.0') # どこからでもアクセス可能に
