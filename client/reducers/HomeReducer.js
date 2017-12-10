@@ -39,7 +39,7 @@ export function homeReducer(state=initialFlagsState, action) {
       flagsLoading: false
     })
   } else if (type == homeConstants.FETCH_ASSETS) {
-    const assets = Object.assign({}, payload)
+    const assets = Object.assign({}, state.assets, payload)
     return Object.assign({}, state, {
       assets: assets,
       assetsLoading: false

@@ -607,7 +607,7 @@
 	    _react2['default'].createElement(
 	      _reactRouter.Route,
 	      { path: '/', component: _LoggedInApp2['default'] },
-	      _react2['default'].createElement(_reactRouter.IndexRoute, { onEnter: requireLogin,
+	      _react2['default'].createElement(_reactRouter.IndexRoute, { onEnter: requireLogin(store),
 	        component: _Home2['default'] }),
 	      _react2['default'].createElement(_reactRouter.Route, { path: 'conditions', onEnter: requireLogin(store),
 	        component: _Conditions2['default'] }),
@@ -28579,7 +28579,7 @@
 	      flagsLoading: false
 	    });
 	  } else if (type == homeConstants.FETCH_ASSETS) {
-	    var assets = Object.assign({}, payload);
+	    var assets = Object.assign({}, state.assets, payload);
 	    return Object.assign({}, state, {
 	      assets: assets,
 	      assetsLoading: false

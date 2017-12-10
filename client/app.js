@@ -456,7 +456,7 @@ ReactDOM.render(
         <Route path="logout" component={Logout} />
       </Route>
       <Route path="/" component={LoggedInApp}>
-        <IndexRoute onEnter={requireLogin}
+        <IndexRoute onEnter={requireLogin(store)}
                component={Home}/>
         <Route path="conditions" onEnter={requireLogin(store)}
                component={Conditions} />
