@@ -29,7 +29,7 @@ models = models(tick_db)
 app = flask.Flask(__name__)
 
 app.config['JWT_SECRET_KEY'] = 'bitcoin_dashboard_secret'
-app.config['JWT_EXPIRATION_DELTA'] = datetime.timedelta(hours=12)
+app.config['JWT_EXPIRATION_DELTA'] = datetime.timedelta(hours=168)
 
 class User(object):
     def __init__(self, id, username, hashed_password):
