@@ -14,7 +14,7 @@ function price(sizes, prices) {
 }
 
 function positions_to_totals(positions) {
-  if (positions.length == 0)
+  if (!positions || positions.length == 0)
     return {
       size: 0,
       pnl: 0,
@@ -47,7 +47,16 @@ function positions_to_totals(positions) {
     pnl += position.pnl
   }
 
-  var totals = { }
+  var totals = {
+    bitflyer: {
+      size: 0,
+      price: 0
+    },
+    quoine: {
+      size: 0,
+      price: 0
+    }
+  }
   for (var exchanger in total) {
     if (total[exchanger].size > 0) {
       totals['size'] = total[exchanger].size
